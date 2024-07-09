@@ -1,65 +1,64 @@
 <?php
-
 namespace App\Http\Controllers;
 
-use App\Models\cohort;
+use App\Models\Cohort;
 use Illuminate\Http\Request;
+use Illuminate\Support\str;
+use Illuminate\Support\Facades\Storage;
+use Illuminate\Support\Facades\log;
+
+use Inertia\Inertia;
 
 class CohortController extends Controller
 {
-    /**
-     * Display a listing of the resource.
-     */
     public function index()
     {
-        //
+        $cohorts = Cohort::all();
+       return Inertia::render('cohorts/index', ['cohorts' => $cohorts]);
+       return response()->json($cohorts);
     }
 
-    /**
-     * Show the form for creating a new resource.
-     */
     public function create()
-    {
-        //
-    }
+     {
+       return Inertia::render('cohorts/create');
+    
+     }
 
-    /**
-     * Store a newly created resource in storage.
-     */
+    // public function store(Request $request)
+    // {
+    //     $request->validate([
+    //         'number' => 'required|integer',
+    //         'name' => 'required|string|max:255',
+    //     ]);
+
+        //Cohort::create($request->all());
+
+        //return redirect()->route('cohorts.index')->with('success', 'Cohort created successfully.');
+    //     $cohort = Cohort::create($request->all());
+
+    //     return response()->json([
+    //         'message' => 'Cohort created successfully',
+    //         'cohort' => $cohort
+    //     ], 201);
+    //     dd($cohort);
+    // }
     public function store(Request $request)
     {
-        //
+        $validatedData = $request->validate([
+            'number' => 'required|integer',
+            'name' => 'required|string',
+        ]);
+    
+        $cohort = Cohort::create($validatedData);
+    
+       // return redirect()->route('cohorts.index')->with('success', 'Cohort created successfully.');
+           // $cohort = Cohort::create($request->all());
+    
+        return response()->json([
+            'message' => 'Cohort created successfully',
+            'cohort' => $cohort
+        ], 201);
     }
-
-    /**
-     * Display the specified resource.
-     */
-    public function show(cohort $cohort)
-    {
-        //
-    }
-
-    /**
-     * Show the form for editing the specified resource.
-     */
-    public function edit(cohort $cohort)
-    {
-        //
-    }
-
-    /**
-     * Update the specified resource in storage.
-     */
-    public function update(Request $request, cohort $cohort)
-    {
-        //
-    }
-
-    /**
-     * Remove the specified resource from storage.
-     */
-    public function destroy(cohort $cohort)
-    {
-        //
-    }
+    
+    // Add methods for show, edit, update, and destroy as needed
 }
