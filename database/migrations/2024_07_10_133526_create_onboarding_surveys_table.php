@@ -14,6 +14,8 @@ return new class extends Migration
         Schema::create('onboarding_surveys', function (Blueprint $table) {
             $table->id();
             $table->foreignId('survey_id')->constrained()->onDelete('cascade');
+            $table->foreignId('cohort_id')->constrained('cohorts')->onDelete('cascade');
+
             $table->string('email');
             $table->string('phone');
             $table->dateTime('material_due')->nullable();

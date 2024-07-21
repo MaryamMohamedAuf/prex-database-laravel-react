@@ -10,6 +10,8 @@ class round2 extends Model
     use HasFactory;
     protected $fillable = [
         'applicant_id',
+        'cohort_id',
+
         'phone',
         'One-Sentence_Description',
         'sector',
@@ -51,5 +53,9 @@ class round2 extends Model
     public function applicant()
     {
         return $this->belongsTo(Applicant::class);
+    }
+    public function cohort()
+    {
+        return $this->belongsTo(Cohort::class);
     }
 }

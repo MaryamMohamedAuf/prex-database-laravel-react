@@ -13,6 +13,8 @@ return new class extends Migration
     {
         Schema::create('applicants', function (Blueprint $table) {
             $table->id();
+            $table->foreignId('cohort_id')->constrained('cohorts')->onDelete('cascade');
+
             $table->string('first_name');
             $table->string('last_name');
             $table->string('email')->unique();

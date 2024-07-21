@@ -10,6 +10,8 @@ return new class extends Migration
         Schema::create('followup_surveys', function (Blueprint $table) {
             $table->id();
             $table->foreignId('survey_id')->constrained()->onDelete('cascade');
+            $table->foreignId('cohort_id')->constrained('cohorts')->onDelete('cascade');
+
             $table->string('survey_tag');
             $table->dateTime('date');
             $table->enum('status', ['Completed', 'Pending', 'In Progress']);

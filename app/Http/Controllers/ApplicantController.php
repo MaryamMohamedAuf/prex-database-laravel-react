@@ -22,6 +22,8 @@ class ApplicantController extends Controller
     {
         $validatedData = $request->validate([
             'first_name' => 'required|string|max:255',
+            'cohort_id' => 'required|exists:cohorts,id',
+
             'last_name' => 'required|string|max:255',
             'email' => 'required|string|email|max:255|unique:applicants',
             'company_name' => 'required|string|max:255',
@@ -47,6 +49,8 @@ class ApplicantController extends Controller
     {
         $validatedData = $request->validate([
             'first_name' => 'sometimes|required|string|max:255',
+            'cohort_id' => 'required|exists:cohorts,id',
+
             'last_name' => 'sometimes|required|string|max:255',
             'email' => 'sometimes|required|string|email|max:255|unique:applicants,email,' . $applicant->id,
             'company_name' => 'sometimes|required|string|max:255',

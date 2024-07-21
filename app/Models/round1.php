@@ -8,6 +8,8 @@ class Round1 extends Model
 {
     protected $fillable = [
        'applicant_id',
+       'cohort_id',
+
         'company_website',
         'company_zip_code',
         'year_company_founded',
@@ -42,5 +44,9 @@ class Round1 extends Model
     public function applicant()
     {
         return $this->belongsTo(Applicant::class);
+    }
+    public function cohort()
+    {
+        return $this->belongsTo(Cohort::class);
     }
 }

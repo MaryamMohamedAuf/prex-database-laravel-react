@@ -2,6 +2,8 @@
 namespace App\Http\Controllers;
 
 use App\Models\Survey;
+use App\Models\cohort;
+
 use App\Models\FollowupSurvey;
 use Illuminate\Http\Request;
 
@@ -28,34 +30,44 @@ class FollowupSurveyController extends Controller
      * Store a newly created resource in storage.
      */
     public function store(Request $request)
-    {
-        // Validate data for both tables
-        $validatedSurveyData = $request->validate([
-            'ApplicantName' => 'required|string',
-            'CohortTag' => 'required|string',
-        ]);
-    
-        $validatedFollowupSurveyData = $request->validate([
-            'date' => 'required|date',
-            'survey_tag' => 'required|string',
-            'status' => 'required|in:Completed,Pending,In Progress',
-        ]);
-    
-        // Create a new survey entry (super entity)
-        $survey = Survey::create($validatedSurveyData);
-    
-        // Add the survey_id to the validated data for followup_survey
-        $validatedFollowupSurveyData['survey_id'] = $survey->id;
-    
-        // Create the followup survey entry (sub-entity)
-        $followupSurvey = FollowupSurvey::create($validatedFollowupSurveyData);
-    
+{
+    // Validate data for both tables
+    $validatedSurveyData = $request->validate([
+        'ApplicantName' => 'required|string',
+        'CohortTag' => 'required|string',
+    ]);
+
+    $validatedFollowupSurveyData = $request->validate([
+        'date' => 'required|date',
+        'survey_tag' => 'required|string',
+        'status' => 'required|in:Completed,Pending,In Progress',
+    ]);
+
+    // Retrieve the last inserted cohort_id from the cohort table
+    $lastCohort = Cohort::latest('id')->first();
+    if ($lastCohort) {
+        $validatedFollowupSurveyData['cohort_id'] = $lastCohort->id;
+    } else {
         return response()->json([
-            'message' => 'Followup Survey created successfully',
-            'followup_survey' => $followupSurvey,
-            'survey' => $survey, // Optionally return the created survey as well
-        ], 201);
+            'message' => 'No cohort found'
+        ], 400);
     }
+
+    // Create a new survey entry (super entity)
+    $survey = Survey::create($validatedSurveyData);
+
+    // Add the survey_id to the validated data for followup_survey
+    $validatedFollowupSurveyData['survey_id'] = $survey->id;
+
+    // Create the followup survey entry (sub-entity)
+    $followupSurvey = FollowupSurvey::create($validatedFollowupSurveyData);
+
+    return response()->json([
+        'message' => 'Followup Survey created successfully',
+        'followup_survey' => $followupSurvey,
+        'survey' => $survey, // Optionally return the created survey as well
+    ], 201);
+}
     
 
     /**

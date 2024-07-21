@@ -14,9 +14,9 @@ return new class extends Migration
         Schema::create('cohorts', function (Blueprint $table) {
             $table->id();
             $table->integer('number');
-            // $table->date('start_date');
-            // $table->date('end_date');
-            $table->string('name');
+            $table->date('start_date');
+            $table->date('end_date');
+           // $table->string('name');
             $table->timestamps();
         });
     }

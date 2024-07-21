@@ -16,13 +16,17 @@ class applicant extends Model
         'last_name',
         'email',
         'company_name',
+        'cohort_id'
     ];
     public function rounds()
     {
         return $this->hasMany(round1::class);
         return $this->hasMany(round3::class);
         return $this->hasMany(round3::class);
-
-
     }
+    public function cohort()
+    {
+        return $this->belongsTo(Cohort::class);
+    }
+
 }

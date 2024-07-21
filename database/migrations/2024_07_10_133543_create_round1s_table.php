@@ -14,6 +14,8 @@ return new class extends Migration
         Schema::create('round1s', function (Blueprint $table) {
             $table->id();
             $table->foreignId('applicant_id')->constrained('applicants')->onDelete('cascade');
+            $table->foreignId('cohort_id')->constrained('cohorts')->onDelete('cascade');
+
             $table->string('company_website')->nullable();
             $table->string('company_zip_code');
             $table->year('year_company_founded')->nullable();

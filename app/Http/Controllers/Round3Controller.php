@@ -3,19 +3,18 @@
 namespace App\Http\Controllers;
 
 use App\Models\Applicant;
+use App\Models\Cohort;
 use App\Models\Round3;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Log;
 
 class Round3Controller extends Controller
 {
-    /**
-     * Display a listing of the Round3 resource.
-     *
-     * @return \Illuminate\Http\Response
-     */
+   
     public function index()
     {
-        $round3s = Round3::with('applicant')->get();
+        // Retrieve all Round3 entries with associated applicant and cohort data
+        $round3s = Round3::with(['applicant', 'cohort'])->get();
 
         return response()->json($round3s);
     }
@@ -27,9 +26,11 @@ class Round3Controller extends Controller
      */
     public function create()
     {
-        $applicants = Applicant::orderBy('last_name')->get();
+        // Get the list of applicants from Round2
+        $applicants = Applicant::whereHas('round2')->orderBy('last_name')->get();
+        $cohorts = Cohort::orderBy('name')->get();
 
-        return view('round3.create', compact('applicants'));
+        return view('round3.create', compact('applicants', 'cohorts'));
     }
 
     /**
@@ -40,16 +41,31 @@ class Round3Controller extends Controller
      */
     public function store(Request $request)
     {
-        // Validate the incoming request data
-        $validatedData = $request->validate([
-            'applicant_id' => 'required|exists:applicants,id',
-            'final_decision' => 'required|boolean',
-            'recorded_meeting_link' => 'nullable|string',
-        ]);
+        try {
+            Log::info('Request data:', $request->all());
 
-        // Create a new Round3 entry
-        Round3::create($validatedData);
+            // Validate the incoming request data
+            $validatedData = $request->validate([
+                'applicant_id' => 'required|exists:applicants,id',
+              //  'cohort_id' => 'required|exists:cohorts,id',
+                'final_decision' => 'required|boolean',
+                'recorded_meeting_link' => 'nullable|string',
+            ]);
 
+            $lastCohort = Cohort::latest('id')->first();
+            if (!$lastCohort) {
+                return response()->json(['message' => 'No cohort found'], 400);
+            }
+
+            $validatedData['cohort_id'] = $lastCohort->id;
+            // Create a new Round3 entry
+            $round3 = Round3::create($validatedData);
+
+            return response()->json(['round3' => $round3], 201);
+        } catch (\Exception $e) {
+            Log::error('Error saving data:', ['message' => $e->getMessage(), 'trace' => $e->getTraceAsString()]);
+            return response()->json(['message' => 'Error saving data'], 500);
+        }
     }
 
     /**
@@ -60,7 +76,7 @@ class Round3Controller extends Controller
      */
     public function show($id)
     {
-        $round3 = Round3::findOrFail($id);
+        $round3 = Round3::with(['applicant', 'cohort'])->findOrFail($id);
 
         return response()->json($round3);
     }
@@ -74,9 +90,10 @@ class Round3Controller extends Controller
     public function edit($id)
     {
         $round3 = Round3::findOrFail($id);
-        $applicants = Applicant::orderBy('company_name')->get();
+        $applicants = Applicant::whereHas('round2')->orderBy('last_name')->get();
+        $cohorts = Cohort::orderBy('name')->get();
 
-        return view('round3.edit', compact('round3', 'applicants'));
+        return view('round3.edit', compact('round3', 'applicants', 'cohorts'));
     }
 
     /**
@@ -88,20 +105,37 @@ class Round3Controller extends Controller
      */
     public function update(Request $request, $id)
     {
-        // Validate the incoming request data
-        $validatedData = $request->validate([
-            'applicant_id' => 'required|exists:applicants,id',
-            'final_decision' => 'required|boolean',
-            'recorded_meeting_link' => 'nullable|string',
-        ]);
+        try {
+            // Validate the incoming request data
+            $validatedData = $request->validate([
+                'applicant_id' => 'required|exists:applicants,id',
+               // 'cohort_id' => 'required|exists:cohorts,id',
+                'final_decision' => 'required|boolean',
+                'recorded_meeting_link' => 'nullable|string',
+            ]);
+            $lastCohort = Cohort::latest('id')->first();
+            if (!$lastCohort) {
+                return response()->json(['message' => 'No cohort found'], 400);
+            }
 
-        // Find the Round3 entry
-        $round3 = Round3::findOrFail($id);
+            $validatedData['cohort_id'] = $lastCohort->id;
+            // Create a new Round3 entry
+            $round3 = Round3::create($validatedData);
 
-        // Update the Round3 entry
-        $round3->update($validatedData);
+            // Find the Round3 entry
+            $round3 = Round3::findOrFail($id);
 
-        //return redirect()->route('round3.index')->with('success', 'Round 3 information updated successfully.');
+            // Update the Round3 entry
+            $round3->update($validatedData);
+
+            return response()->json([
+                'message' => 'Round 3 entry updated successfully',
+                'round3' => $round3,
+            ], 200);
+        } catch (\Exception $e) {
+            Log::error('Error updating data:', ['message' => $e->getMessage(), 'trace' => $e->getTraceAsString()]);
+            return response()->json(['message' => 'Error updating data'], 500);
+        }
     }
 
     /**
@@ -121,4 +155,3 @@ class Round3Controller extends Controller
         return response()->json(null, 204);
     }
 }
-

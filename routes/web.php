@@ -42,5 +42,9 @@ Route::middleware('auth')->group(function () {
 // Route::get('cohorts', [CohortController::class, 'index']);
 // Route::post('cohorts', [CohortController::class, 'store']);
 
+Route::get('/set-cohort/{id}', function ($id) {
+    session(['cohort_id' => $id]);
+    return response()->json(['message' => 'Cohort ID set in session', 'cohort_id' => $id]);
+});
 
 require __DIR__.'/auth.php';

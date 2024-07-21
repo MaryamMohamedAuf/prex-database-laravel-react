@@ -13,10 +13,15 @@ class FollowupSurvey extends Model
         'survey_tag',
         'survey_id',
         'status',
+        'cohort_id'
     ];
 
     public function survey()
     {
         return $this->belongsTo(Survey::class);
+    }
+    public function cohort()
+    {
+        return $this->belongsTo(Cohort::class);
     }
 }

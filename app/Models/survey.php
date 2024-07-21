@@ -10,6 +10,7 @@ class Survey extends Model
 
     protected $fillable = [
         'ApplicantName',
+        'cohort_id',
         'CohortTag',
     ];
 
@@ -18,5 +19,9 @@ class Survey extends Model
         return $this->hasMany(FollowupSurvey::class);
         return $this->hasMany(OnboardingSurvey::class);
 
+    }
+    public function cohort()
+    {
+        return $this->belongsTo(Cohort::class);
     }
 }

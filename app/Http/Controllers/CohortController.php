@@ -10,10 +10,11 @@ use Inertia\Inertia;
 
 class CohortController extends Controller
 {
+    
     public function index()
     {
         $cohorts = Cohort::all();
-       return Inertia::render('cohorts/index', ['cohorts' => $cohorts]);
+      // return Inertia::render('cohorts/index', ['cohorts' => $cohorts]);
        return response()->json($cohorts);
     }
 
@@ -27,10 +28,20 @@ class CohortController extends Controller
     {
         $validatedData = $request->validate([
             'number' => 'required|integer',
-            'name' => 'required|string',
+            'start_date' => 'required|date',
+            'end_date' => 'required|date',
         ]);
     
         $cohort = Cohort::create($validatedData);
+
+        /////////////
+        $cohort = Cohort::find(1);
+$round2s = $cohort->round2s;
+
+foreach ($round2s as $round2) {
+    echo $round2->some_attribute;
+}
+////////////////////
     
        // return redirect()->route('cohorts.index')->with('success', 'Cohort created successfully.');
            // $cohort = Cohort::create($request->all());
@@ -43,7 +54,7 @@ class CohortController extends Controller
     
     public function show($id)
     {
-        $cohort = Cohort::findOrFail($id);
+        $cohort = Cohort::with(['applicants', 'onboardingSurveys', 'followupSurveys', 'round1s', 'round2s', 'round3s'])->findOrFail($id);
         return response()->json($cohort);
     }
 
@@ -57,7 +68,8 @@ class CohortController extends Controller
     {
         $validatedData = $request->validate([
             'number' => 'required|integer',
-            'name' => 'required|string',
+            'start_date' => 'required|date',
+            'end_date' => 'required|date',
         ]);
 
         $cohort = Cohort::findOrFail($id);

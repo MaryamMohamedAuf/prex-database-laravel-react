@@ -14,6 +14,8 @@ return new class extends Migration
         Schema::create('round3s', function (Blueprint $table) {
             $table->id();
             $table->foreignId('applicant_id')->constrained('applicants')->onDelete('cascade');
+            $table->foreignId('cohort_id')->constrained('cohorts')->onDelete('cascade');
+
             $table->boolean('final_decision');
             $table->string('recorded_meeting_link')->nullable();
             $table->timestamps();
