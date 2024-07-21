@@ -1,8 +1,9 @@
 <?php
 namespace App\Http\Controllers;
 
+use App\Models\Test;
 use Illuminate\Http\Request;
-use App\Models\Applicant; // Assuming you're storing the data in the Applicant model
+use App\Models\Tests; // Assuming you're storing the data in the Applicant model
 
 class GoogleFormController extends Controller
 {
@@ -16,7 +17,7 @@ class GoogleFormController extends Controller
         ]);
 
         // Create a new applicant with the data
-        $applicant = Applicant::create([
+        $applicant = Test::create([
             'name' => $request->input('name'),
             'phone' => $request->input('phone'),
             // Add other fields as necessary
