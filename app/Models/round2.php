@@ -13,7 +13,7 @@ class round2 extends Model
         'cohort_id',
 
         'phone',
-        'One-Sentence_Description',
+        'One_Sentence_Description',
         'sector',
         'other_sector',
         'business_model',

@@ -16,8 +16,10 @@ use App\Http\Controllers\FollowupSurveyController;
 use App\Http\Controllers\OnboardingSurveyController;
 use App\Http\Controllers\GoogleFormController;
 
-
 Route::post('/google-form-response', [GoogleFormController::class,'handleResponse']);
+
+Route::get('/applicant/details/{id}', [ApplicantController::class, 'getApplicantDetails']);
+
 
 Route::resource('cohorts', CohortController::class);
 Route::resource('applicants', ApplicantController::class);
@@ -27,6 +29,15 @@ Route::resource('onboardingSurvey', OnboardingSurveyController::class);
 Route::resource('round1', Round1Controller::class);
 Route::resource('round2', Round2Controller::class);
 Route::resource('round3', Round3Controller::class);
+
+// In routes/api.php or routes/web.php
+Route::get('round1/getByCohort/{cohortId}', [Round1Controller::class, 'getByCohort']);
+Route::get('round2/getByCohort/{cohortId}', [Round2Controller::class, 'getByCohort']);
+Route::get('round3/getByCohort/{cohortId}', [Round3Controller::class, 'getByCohort']);
+Route::get('followupSurvey/getByCohort/{cohortId}', [FollowupSurveyController::class, 'getByCohort']);
+Route::get('onboardingSurvey/getByCohort/{cohortId}', [OnboardingSurveyController::class, 'getByCohort']);
+
+
 
 Route::resource('test', TestController::class);
 

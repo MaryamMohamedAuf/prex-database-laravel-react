@@ -42,4 +42,8 @@ class cohort extends Model
     {
         return $this->hasManyThrough(Round3::class, Applicant::class);
     }
+    public function applicants()
+    {
+        return $this->hasMany(Applicant::class);
+    }
 }

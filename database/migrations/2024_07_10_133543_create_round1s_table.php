@@ -60,7 +60,7 @@ return new class extends Migration
             $table->string('if_you_selected_other_please_specify')->nullable();
             $table->text('short_problem_description');
             $table->text('detailed_description');
-            $table->enum('applied_to_accelerator?', [
+            $table->enum('applied_to_accelerator', [
                 'No', 
                 'Yes - I was accepted and received funding',
                 'Yes - I was accepted but there was no funding',
@@ -69,7 +69,7 @@ return new class extends Migration
                 'I’m not sure'
             ]);
             $table->string('previous_accelerator_places')->nullable();
-            $table->string('If_“Yes”_please_indicate_ALL_the_PREVIOUS_places')->nullable();
+            $table->string('If_Yes_please_indicate_ALL_the_PREVIOUS_places')->nullable();
             $table->string('funding_received');
             $table->string('amount_funding_raised');
             $table->string('revenue_generated');

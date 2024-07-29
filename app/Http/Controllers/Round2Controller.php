@@ -10,6 +10,11 @@ use Illuminate\Support\Facades\Log;
 
 class Round2Controller extends Controller
 {
+    public function getByCohort($cohortId)
+{
+    $round1s = Round2::with('applicant')->where('cohort_id', $cohortId)->get();
+    return response()->json($round1s);
+}
     public function index($cohortId)
     {
         $cohortId = session('cohort_id');
@@ -41,7 +46,14 @@ class Round2Controller extends Controller
                 'email' => 'required|email|unique:applicants,email',
                 'company_name' => 'required|string',
             ]);
-
+            $applicant = Applicant::whereHas('round1', function ($query) use ($applicantData) {
+                $query->where('company_name', $applicantData['company_name']);
+            })->first();
+    
+            if (!$applicant) {
+                // Return an error message if the applicant has not applied to Round 1
+                return response()->json(['message' => 'Company name must be the same you entered in Round 1. If you did not apply to Round 1, please fill out its form first.'], 400);
+            }
             // Get the last cohort ID
             $lastCohort = Cohort::latest('id')->first();
             if (!$lastCohort) {
@@ -50,13 +62,13 @@ class Round2Controller extends Controller
             $applicantData['cohort_id'] = $lastCohort->id;
 
             // Create an applicant entry
-            $applicant = Applicant::create($applicantData);
-            Log::info('Applicant created:', ['applicant_id' => $applicant->id]);
+           // $applicant = Applicant::create($applicantData);
+           // Log::info('Applicant created:', ['applicant_id' => $applicant->id]);
 
             // Validate request data for round2s table
             $round2Data = $request->validate([
                 'phone' => 'nullable|string',
-                'One-Sentence_Description' => 'nullable|string|max:125',
+                'One_Sentence_Description' => 'nullable|string|max:125',
                 'sector' => 'required|string',
                 'other_sector' => 'nullable|string',
                 'business_model' => 'required|string',

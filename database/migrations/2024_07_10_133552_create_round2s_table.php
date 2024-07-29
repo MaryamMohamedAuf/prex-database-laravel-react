@@ -17,7 +17,7 @@ return new class extends Migration
             $table->foreignId('cohort_id')->constrained('cohorts')->onDelete('cascade');
 
             $table->string('phone')->nullable();
-            $table->string('One-Sentence_Description')->nullable();
+            $table->string('One_Sentence_Description')->nullable();
             $table->string('sector');
             $table->string('other_sector')->nullable();
             $table->string('business_model');

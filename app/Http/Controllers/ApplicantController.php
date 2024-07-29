@@ -6,9 +6,18 @@ use Illuminate\Http\Request;
 
 class ApplicantController extends Controller
 {
-    /**
-     * Display a listing of the resource.
-     */
+   // app/Http/Controllers/ApplicantController.php
+public function getApplicantDetails($id)
+{
+    try {
+        $applicant = Applicant::with('round1', 'round2', 'round3')->find($id);
+        return response()->json($applicant);
+    } catch (\Exception $e) {
+        return response()->json(['message' => 'Error fetching applicant details'], 500);
+    }
+   
+}
+
     public function index()
     {
         $applicants = Applicant::all();

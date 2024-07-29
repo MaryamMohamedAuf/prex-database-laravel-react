@@ -17,6 +17,10 @@ class Survey extends Model
     public function followupSurveys()
     {
         return $this->hasMany(FollowupSurvey::class);
+
+    }
+    public function onboardingSurveys()
+    {
         return $this->hasMany(OnboardingSurvey::class);
 
     }

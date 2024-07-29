@@ -9,6 +9,11 @@ use Illuminate\Http\Request;
 
 class FollowupSurveyController extends Controller
 {
+    public function getByCohort($cohortId)
+{
+    $round1s = FollowupSurvey::with('survey')->where('cohort_id', $cohortId)->get();
+    return response()->json($round1s);
+}
     /**
      * Display a listing of the resource.
      */

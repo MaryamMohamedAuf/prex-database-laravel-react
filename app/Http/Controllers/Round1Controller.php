@@ -10,19 +10,18 @@ use Illuminate\Support\Facades\Log;
 
 class Round1Controller extends Controller
 {
+// In app/Http/Controllers/Round1Controller.php
+public function getByCohort($cohortId)
+{
+    $round1s = Round1::with('applicant')->where('cohort_id', $cohortId)->get();
+    return response()->json($round1s);
+}
+
+
+
     public function index($cohortId)
     {
-        $cohortId = session('cohort_id');
-
-        if (!$cohortId) {
-            return response()->json(['error' => 'Cohort ID not found in session'], 400);
-        }
-    
-        $cohort = Cohort::find($cohortId);
-        if (!$cohort) {
-            return response()->json(['error' => 'Cohort not found'], 404);
-        }
-
+        
         // Retrieve all round1 entries with associated applicant and cohort data
         $round1s = Round1::with(['applicant', 'cohort'])->where('cohort_id', $cohortId)->get();
 
@@ -66,8 +65,8 @@ class Round1Controller extends Controller
                 'company_team_location' => 'required|string',
                 'short_problem_description' => 'required|string',
                 'detailed_description' => 'required|string',
-                'applied_to_accelerator?' => 'required|string',
-                'If_“Yes”_please_indicate_ALL_the_PREVIOUS_places' => 'nullable|string',
+                'applied_to_accelerator' => 'required|string',
+                'If_Yes_please_indicate_ALL_the_PREVIOUS_places' => 'nullable|string',
                 'previous_accelerator_places' => 'nullable|string',
                 'funding_received' => 'required|array',
                 'amount_funding_raised' => 'required|string',
@@ -108,6 +107,8 @@ class Round1Controller extends Controller
 
     public function show($id)
     {
+        Log::info('Fetching Round1 data for ' . $id);
+
         // Retrieve the round1 entry by id including related applicant data
         $round1 = Round1::with('applicant')->findOrFail($id);
 
@@ -142,7 +143,7 @@ class Round1Controller extends Controller
             'company_team_location' => 'required|string|max:255',
             'short_problem_description' => 'required|string|max:255',
             'detailed_description' => 'required|string|max:65535',
-            'applied_to_accelerator?' => 'required|string|max:255',
+            'applied_to_accelerator' => 'required|string|max:255',
             'If_“Yes”_please_indicate_ALL_the_PREVIOUS_places' => 'nullable|string|max:255',
             'previous_accelerator_places' => 'nullable|string|max:255',
             'funding_received' => 'required|array',

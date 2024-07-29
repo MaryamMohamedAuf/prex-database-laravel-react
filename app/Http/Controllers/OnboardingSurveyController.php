@@ -9,6 +9,11 @@ use Illuminate\Http\Request;
 
 class OnboardingSurveyController extends Controller
 {
+    public function getByCohort($cohortId)
+{
+    $round1s = OnboardingSurvey::with('survey')->where('cohort_id', $cohortId)->get();
+    return response()->json($round1s);
+}
     public function index()
     {
         $onboardingSurveys = OnboardingSurvey::with('survey')->get();
@@ -26,7 +31,7 @@ class OnboardingSurveyController extends Controller
         'CohortTag' => 'required|string',
         'email' => 'nullable|email',
         'phone' => 'nullable|string',
-        'material_due' => 'nullable|string',
+        'material_due' => 'nullable|date',
     ]);
 
     // Retrieve the last inserted cohort_id from the cohort table
@@ -62,12 +67,14 @@ class OnboardingSurveyController extends Controller
 
     public function show(OnboardingSurvey $onboardingSurvey)
     {
-        $onboardingSurvey->load('survey'); // Eager load the associated survey
+       // $onboardingSurvey->load('survey'); // Eager load the associated survey
+        return response()->json($onboardingSurvey->load('survey'));
 
-        return response()->json([
-            'message' => 'Successfully fetched Onboarding Survey',
-            'onboarding_survey' => $onboardingSurvey,
-        ]);
+
+        // return response()->json([
+        //     'message' => 'Successfully fetched Onboarding Survey',
+        //     'onboarding_survey' => $onboardingSurvey,
+        //]);
     }
 
     public function update(Request $request, OnboardingSurvey $onboardingSurvey)
@@ -115,17 +122,22 @@ class OnboardingSurveyController extends Controller
 
     public function destroy(OnboardingSurvey $onboardingSurvey)
     {
-        // Delete Survey record associated with OnboardingSurvey
+        // Find the Survey associated with the OnboardingSurvey
         $survey = Survey::find($onboardingSurvey->survey_id);
+    
+        $onboardingSurvey->delete();
+    
         if ($survey) {
             $survey->delete();
         }
-
-        // Delete OnboardingSurvey record
-        $onboardingSurvey->delete();
-
+    
         return response()->json([
             'message' => 'Onboarding Survey and associated Survey deleted successfully',
         ]);
     }
-}
+    
+
+        
+
+    }
+

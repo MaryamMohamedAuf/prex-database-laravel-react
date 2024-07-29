@@ -10,7 +10,12 @@ use Illuminate\Support\Facades\Log;
 
 class Round3Controller extends Controller
 {
-   
+    public function getByCohort($cohortId)
+    {
+        $round1s = Round3::with('applicant')->where('cohort_id', $cohortId)->get();
+        return response()->json($round1s);
+    }
+    
     public function index()
     {
         // Retrieve all Round3 entries with associated applicant and cohort data
@@ -81,12 +86,7 @@ class Round3Controller extends Controller
         return response()->json($round3);
     }
 
-    /**
-     * Show the form to edit the specified Round3 resource.
-     *
-     * @param  int  $id
-     * @return \Illuminate\View\View
-     */
+    
     public function edit($id)
     {
         $round3 = Round3::findOrFail($id);
@@ -119,8 +119,7 @@ class Round3Controller extends Controller
             }
 
             $validatedData['cohort_id'] = $lastCohort->id;
-            // Create a new Round3 entry
-            $round3 = Round3::create($validatedData);
+          // $round3 = Round3::create($validatedData);
 
             // Find the Round3 entry
             $round3 = Round3::findOrFail($id);
