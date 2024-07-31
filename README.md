@@ -77,17 +77,15 @@ Database: MySQL (or your choice of database)
 API Testing: Thunder
 
 1. Admin Documentation
-1. Introduction
+1.1 Introduction
 This system is designed for cohort management by providing a platform for tracking applications, managing surveys, and displaying rounds data.
-2. Getting Started
+
+1.2 Getting Started
 Cohorts: View and edit cohorts or see all entities related to the cohort as surveys and rounds, like in the following example
-
-
 Rounds: Access applicants’ application for round1,2 to view, edit or delete it.
-
 Surveys:  Access applicants’ application for surveys to view, edit or delete it.
 
-3. User Roles and Permissions
+1.3 User Roles and Permissions
 Admin: Full access to all features.
 applicants: fill round1, round2 and surveys forms
 
