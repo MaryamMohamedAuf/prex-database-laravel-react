@@ -71,12 +71,19 @@ The Laravel framework is open-sourced software licensed under the [MIT license](
 
 
 Technologies Used:
+
 Backend: Laravel 11
+
 Frontend: React
+
 Styling: Bootstrap
+
 Authentication: Laravel Breeze
+
 Database: MySQL
+
 API Testing: Thunder
+
 
 1. Admin Documentation
 
