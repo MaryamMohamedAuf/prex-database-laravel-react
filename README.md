@@ -77,6 +77,7 @@ Database: MySQL (or your choice of database)
 API Testing: Thunder
 
 1. Admin Documentation
+
 1.1 Introduction
 This system is designed for cohort management by providing a platform for tracking applications, managing surveys, and displaying rounds data.
 
