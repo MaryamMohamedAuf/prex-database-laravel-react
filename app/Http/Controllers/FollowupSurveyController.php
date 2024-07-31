@@ -36,10 +36,10 @@ class FollowupSurveyController extends Controller
      */
     public function store(Request $request)
 {
-    // Validate data for both tables
     $validatedSurveyData = $request->validate([
-        'ApplicantName' => 'required|string',
-        'CohortTag' => 'required|string',
+        'applicant_name' => 'required|string',
+        'company_name' => 'required|string',
+        'cohort_tag' => 'required|string'
     ]);
 
     $validatedFollowupSurveyData = $request->validate([
@@ -52,6 +52,8 @@ class FollowupSurveyController extends Controller
     $lastCohort = Cohort::latest('id')->first();
     if ($lastCohort) {
         $validatedFollowupSurveyData['cohort_id'] = $lastCohort->id;
+        $validatedSurveyData['cohort_id'] = $lastCohort->id;
+
     } else {
         return response()->json([
             'message' => 'No cohort found'
@@ -70,7 +72,7 @@ class FollowupSurveyController extends Controller
     return response()->json([
         'message' => 'Followup Survey created successfully',
         'followup_survey' => $followupSurvey,
-        'survey' => $survey, // Optionally return the created survey as well
+        'survey' => $survey, // return the created survey as well
     ], 201);
 }
     
@@ -98,8 +100,9 @@ class FollowupSurveyController extends Controller
 {
     // Validate data for both tables
     $validatedSurveyData = $request->validate([
-        'ApplicantName' => 'required|string',
-        'CohortTag' => 'required|string',
+        'applicant_name' => 'required|string',
+        'cohort_tag' => 'required|string',
+        'company_name' => 'required|string'
     ]);
 
     $validatedFollowupSurveyData = $request->validate([

@@ -15,7 +15,6 @@ public function getApplicantDetails($id)
     } catch (\Exception $e) {
         return response()->json(['message' => 'Error fetching applicant details'], 500);
     }
-   
 }
 
     public function index()

@@ -17,8 +17,6 @@ public function getByCohort($cohortId)
     return response()->json($round1s);
 }
 
-
-
     public function index($cohortId)
     {
         

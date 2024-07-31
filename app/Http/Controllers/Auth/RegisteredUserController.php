@@ -1,7 +1,5 @@
 <?php
-
 namespace App\Http\Controllers\Auth;
-
 use App\Http\Controllers\Controller;
 use App\Models\User;
 use Illuminate\Auth\Events\Registered;
@@ -22,13 +20,13 @@ class RegisteredUserController extends Controller
     {
         return Inertia::render('Auth/Register');
     }
-
     /**
      * Handle an incoming registration request.
      *
      * @throws \Illuminate\Validation\ValidationException
      */
-    public function store(Request $request): RedirectResponse
+    public function store(Request $request)
+    //: RedirectResponse
     {
         $request->validate([
             'name' => 'required|string|max:255',
@@ -46,6 +44,9 @@ class RegisteredUserController extends Controller
 
         Auth::login($user);
 
-        return redirect(route('dashboard', absolute: false));
+        return response()->json(['message' => 'User registered successfully.']);
+
+
+      //  return redirect(route('dashboard', absolute: false));
     }
 }

@@ -13,6 +13,7 @@ class CohortController extends Controller
     
     public function index()
     {
+        $user = auth()->user();
         $cohorts = Cohort::all();
       // return Inertia::render('cohorts/index', ['cohorts' => $cohorts]);
        return response()->json($cohorts);
@@ -26,6 +27,7 @@ class CohortController extends Controller
      
     public function store(Request $request)
     {
+        $user = auth()->user();
         $validatedData = $request->validate([
             'number' => 'required|integer',
             'start_date' => 'required|date',

@@ -9,9 +9,10 @@ class Survey extends Model
     use HasFactory;
 
     protected $fillable = [
-        'ApplicantName',
+        'applicant_name',        
+        'comapny_name',
         'cohort_id',
-        'CohortTag',
+        'cohort_tag'
     ];
 
     public function followupSurveys()

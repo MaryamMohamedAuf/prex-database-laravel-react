@@ -10,20 +10,24 @@ class AddCohortIdToApplicantsAndRoundsTables extends Migration
      */
     public function up(): void
     {
-        Schema::table('applicants', function (Blueprint $table) {
-            $table->foreignId('cohort_id')->constrained()->onDelete('cascade');
-        });
+        // Schema::table('applicants', function (Blueprint $table) {
+        //     $table->foreignId('cohort_id')->constrained()->onDelete('cascade');
+        // });
 
-        Schema::table('round1s', function (Blueprint $table) {
-            $table->foreignId('cohort_id')->constrained()->onDelete('cascade');
-        });
-        Schema::table('round2s', function (Blueprint $table) {
-            $table->foreignId('cohort_id')->constrained()->onDelete('cascade');
-        });
+        // Schema::table('round1s', function (Blueprint $table) {
+        //     $table->foreignId('cohort_id')->constrained()->onDelete('cascade');
+        // });
+        // Schema::table('round2s', function (Blueprint $table) {
+        //     $table->foreignId('cohort_id')->constrained()->onDelete('cascade');
+        // });
 
-        Schema::table('round3s', function (Blueprint $table) {
-            $table->foreignId('cohort_id')->constrained()->onDelete('cascade');
-        });
+        // Schema::table('round3s', function (Blueprint $table) {
+        //     $table->foreignId('cohort_id')->constrained()->onDelete('cascade');
+        // });
+
+        // Schema::table('surveys', function (Blueprint $table) {
+        //     $table->foreignId('cohort_id')->constrained()->onDelete('cascade');
+        // });
     }
 
     /**
@@ -31,34 +35,34 @@ class AddCohortIdToApplicantsAndRoundsTables extends Migration
      */
     public function down(): void
     {
-        Schema::table('applicants', function (Blueprint $table) {
-            $table->dropForeign(['cohort_id']);
-            $table->dropColumn('cohort_id');
-        });
+        // Schema::table('applicants', function (Blueprint $table) {
+        //     $table->dropForeign(['cohort_id']);
+        //     $table->dropColumn('cohort_id');
+        // });
 
-        Schema::table('round1s', function (Blueprint $table) {
-            $table->dropForeign(['cohort_id']);
-            $table->dropColumn('cohort_id');
-        });
-        Schema::table('round2s', function (Blueprint $table) {
-            $table->dropForeign(['cohort_id']);
-            $table->dropColumn('cohort_id');
-        });
+        // Schema::table('round1s', function (Blueprint $table) {
+        //     $table->dropForeign(['cohort_id']);
+        //     $table->dropColumn('cohort_id');
+        // });
+        // Schema::table('round2s', function (Blueprint $table) {
+        //     $table->dropForeign(['cohort_id']);
+        //     $table->dropColumn('cohort_id');
+        // });
 
-        Schema::table('round3s', function (Blueprint $table) {
-            $table->dropForeign(['cohort_id']);
-            $table->dropColumn('cohort_id');
-        });
-        Schema::table('surveys', function (Blueprint $table) {
-            $table->dropForeign(['cohort_id']);
-            $table->dropColumn('cohort_id');
-        }); Schema::table('followup_urveys', function (Blueprint $table) {
-            $table->dropForeign(['cohort_id']);
-            $table->dropColumn('cohort_id');
-        }); Schema::table('onboarding_surveys', function (Blueprint $table) {
-            $table->dropForeign(['cohort_id']);
-            $table->dropColumn('cohort_id');
-        });
+        // Schema::table('round3s', function (Blueprint $table) {
+        //     $table->dropForeign(['cohort_id']);
+        //     $table->dropColumn('cohort_id');
+        // });
+        // Schema::table('surveys', function (Blueprint $table) {
+        //     $table->dropForeign(['cohort_id']);
+        //     $table->dropColumn('cohort_id');
+        // }); Schema::table('followup_urveys', function (Blueprint $table) {
+        //     $table->dropForeign(['cohort_id']);
+        //     $table->dropColumn('cohort_id');
+        // }); Schema::table('onboarding_surveys', function (Blueprint $table) {
+        //     $table->dropForeign(['cohort_id']);
+        //     $table->dropColumn('cohort_id');
+        // });
 
        
     }
