@@ -10,7 +10,6 @@ return new class extends Migration
         Schema::create('surveys', function (Blueprint $table) {
             $table->id();
             $table->foreignId('cohort_id')->constrained('cohorts')->onDelete('cascade');
-
             $table->string('applicant_name');
             $table->string('company_name');
             $table->string('cohort_tag');

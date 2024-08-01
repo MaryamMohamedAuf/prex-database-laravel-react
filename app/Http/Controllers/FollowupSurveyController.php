@@ -103,8 +103,11 @@ class FollowupSurveyController extends Controller
     /**
      * Update the specified resource in storage.
      */
-    public function update(Request $request, FollowupSurvey $followupSurvey)
+    public function update(Request $request, FollowupSurvey $followupSurvey, $id)
 {
+    $followupSurvey = followupSurvey::findOrFail($id);
+    $survey = Survey::find($followupSurvey->survey_id);
+
     $validatedSurveyData = $request->validate([
         'applicant_name' => 'required|string',
         'cohort_tag' => 'required|string',
@@ -116,15 +119,9 @@ class FollowupSurveyController extends Controller
         'status' => 'required|in:Completed,Pending,In Progress',
     ]);
 
-    // Retrieve the associated survey
-    $survey = Survey::find($followupSurvey->survey_id);
-
-    // Update the survey data
     if ($survey) {
         $survey->update($validatedSurveyData);
     }
-
-    // Update the followup survey data
     $followupSurvey->update($validatedFollowupSurveyData);
 
     return response()->json([
@@ -137,9 +134,9 @@ class FollowupSurveyController extends Controller
     /**
      * Remove the specified resource from storage.
      */
-    public function destroy(FollowupSurvey $followupSurvey)
+    public function destroy(FollowupSurvey $followupSurvey, $id)
     {
-        // Retrieve the associated survey
+        $followupSurvey = FollowupSurvey::findOrFail($id);
         $survey = Survey::find($followupSurvey->survey_id);
     
         // Delete the followup survey

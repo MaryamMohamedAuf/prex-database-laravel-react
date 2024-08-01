@@ -86,8 +86,10 @@ class OnboardingSurveyController extends Controller
         ]);
     }
 
-    public function update(Request $request, OnboardingSurvey $onboardingSurvey)
+    public function update(Request $request, OnboardingSurvey $onboardingSurvey, $id)
     {
+        $onboardingSurvey = OnboardingSurvey::findOrFail($id);
+        $survey = Survey::find($onboardingSurvey->survey_id);
         $validatedData = $request->validate([
             'applicant_name' => 'required|string',
             'cohort_tag' => 'required|string',
@@ -96,9 +98,7 @@ class OnboardingSurveyController extends Controller
             'phone' => 'nullable|string',
             'material_due' => 'nullable|string',
         ]);
-        $survey = $onboardingSurvey->survey;
 
-        //$survey = Survey::find($onboardingSurvey->survey_id);
         if (!$survey) {
             return response()->json(['error' => 'Survey not found'], 404);
         }
@@ -130,9 +130,10 @@ class OnboardingSurveyController extends Controller
         ]);
     }
 
-    public function destroy(OnboardingSurvey $onboardingSurvey)
+    public function destroy(OnboardingSurvey $onboardingSurvey, $id)
     {
-        // Find the Survey associated with the OnboardingSurvey
+        $onboardingSurvey = OnboardingSurvey::findOrFail($id);
+
         $survey = Survey::find($onboardingSurvey->survey_id);
     
         $onboardingSurvey->delete();
