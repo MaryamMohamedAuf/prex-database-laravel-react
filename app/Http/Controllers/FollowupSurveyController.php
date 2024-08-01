@@ -6,6 +6,8 @@ use App\Models\cohort;
 
 use App\Models\FollowupSurvey;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Log;
+
 
 class FollowupSurveyController extends Controller
 {
@@ -80,9 +82,14 @@ class FollowupSurveyController extends Controller
     /**
      * Display the specified resource.
      */
-    public function show(FollowupSurvey $followupSurvey)
+    public function show(FollowupSurvey $followupSurvey ,$id)
     {
-        return response()->json($followupSurvey->load('survey'));
+       // return response()->json($followupSurvey->load('survey'));
+        Log::info('Fetching follow up survey data for ' . $id);
+
+        $followupSurvey = FollowupSurvey::with('survey')->findOrFail($id);
+
+        return response()->json($followupSurvey);
     }
 
     /**
@@ -98,13 +105,11 @@ class FollowupSurveyController extends Controller
      */
     public function update(Request $request, FollowupSurvey $followupSurvey)
 {
-    // Validate data for both tables
     $validatedSurveyData = $request->validate([
         'applicant_name' => 'required|string',
         'cohort_tag' => 'required|string',
-        'company_name' => 'required|string'
+        'company_name' => 'nullable|string'
     ]);
-
     $validatedFollowupSurveyData = $request->validate([
         'date' => 'required|date',
         'survey_tag' => 'required|string',

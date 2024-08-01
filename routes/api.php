@@ -50,27 +50,33 @@ Route::post('round2/create', [Round2Controller::class, 'store']);
 Route::post('followupSurvey/create', [FollowupSurveyController::class, 'store']);
 Route::post('onboardingSurvey/create', [OnboardingSurveyController::class, 'store']);
 
-
 Route::middleware('auth:sanctum')->group(function () {
-         Route::put('round1', [Round1Controller::class, 'update']);
-         Route::get('round1/${id}', [Round1Controller::class, 'show']);
-         Route::delete('round1', [Round1Controller::class, 'delete']);
+    
+         Route::put('round1/{id}', [Round1Controller::class, 'update']);
+         Route::get('round1/{id}', [Round1Controller::class, 'show']);
+         Route::delete('round1/{id}', [Round1Controller::class, 'destroy']);
          
-         Route::put('round2', [Round2Controller::class, 'update']);
-         Route::get('round2/${id}', [Round2Controller::class, 'show']);
-         Route::delete('round2', [Round2Controller::class, 'delete']);
+         Route::put('round2/{id}', [Round2Controller::class, 'update']);
+         Route::get('round2/{id}', [Round2Controller::class, 'show']);
+         Route::delete('round2/{id}', [Round2Controller::class, 'destroy']);
 
-         Route::put('followupSurvey', [FollowupSurveyController::class, 'update']);
-         Route::get('followupSurvey/${id}', [FollowupSurveyController::class, 'show']);
-         Route::delete('followupSurvey', [FollowupSurveyController::class, 'delete']);
+         Route::put('followupSurvey/{id}', [FollowupSurveyController::class, 'update']);
+         Route::get('followupSurvey/{id}', [FollowupSurveyController::class, 'show']);
+         Route::delete('followupSurvey/{id}', [FollowupSurveyController::class, 'destroy']);
 
-         Route::put('onboardingSurvey', [OnboardingSurveyController::class, 'update']);
-         Route::get('onboardingSurvey/${id}', [OnboardingSurveyController::class, 'show']);
-         Route::delete('onboardingSurvey', [OnboardingSurveyController::class, 'delete']);
+         Route::put('onboardingSurvey/{id}', [OnboardingSurveyController::class, 'update']);
+         Route::get('onboardingSurvey/{id}', [OnboardingSurveyController::class, 'show']);
+         Route::delete('onboardingSurvey/{id}', [OnboardingSurveyController::class, 'destroy']);
+
+         Route::put('onboardingSurvey/{id}', [OnboardingSurveyController::class, 'update']);
+         Route::get('onboardingSurvey/{id}', [OnboardingSurveyController::class, 'show']);
+         Route::delete('onboardingSurvey/{id}', [OnboardingSurveyController::class, 'destroy']);
 
 Route::resource('cohorts', CohortController::class);
-Route::resource('followupSurvey', FollowupSurveyController::class);
-Route::resource('onboardingSurvey', OnboardingSurveyController::class);
+Route::resource('applicants', ApplicantController::class);
+Route::resource('surveys', SurveyController::class);
+//Route::resource('followupSurvey', FollowupSurveyController::class);
+//Route::resource('onboardingSurvey', OnboardingSurveyController::class);
 Route::resource('round3', Round3Controller::class);
 Route::get('round1/getByCohort/{cohortId}', [Round1Controller::class, 'getByCohort']);
 Route::get('round2/getByCohort/{cohortId}', [Round2Controller::class, 'getByCohort']);

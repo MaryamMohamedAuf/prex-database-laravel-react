@@ -166,14 +166,9 @@ public function getByCohort($cohortId)
 
         // Log data to be updated
         Log::info('Updating Applicant:', $validatedApplicantData);
-        Log::info('Updating Round1:', $validatedRound1Data);
-
-       
+        Log::info('Updating Round1:', $validatedRound1Data);       
         $applicant->update($validatedApplicantData);
-
-        // Update the Round1 data
         $round1->update($validatedRound1Data);
-
         return response()->json([
             'message' => 'Applicant and associated Round1 updated successfully',
             'applicant' => $applicant,

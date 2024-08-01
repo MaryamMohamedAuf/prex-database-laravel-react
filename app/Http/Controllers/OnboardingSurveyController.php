@@ -4,6 +4,7 @@ namespace App\Http\Controllers;
 use App\Models\OnboardingSurvey;
 use App\Models\Survey;
 use App\Models\cohort;
+use Illuminate\Support\Facades\Log;
 
 use Illuminate\Http\Request;
 
@@ -69,16 +70,20 @@ class OnboardingSurveyController extends Controller
     ], 201);
 }
 
-    public function show(OnboardingSurvey $onboardingSurvey)
+    public function show(OnboardingSurvey $onboardingSurvey, $id)
     {
-       // $onboardingSurvey->load('survey'); // Eager load the associated survey
-        return response()->json($onboardingSurvey->load('survey'));
+       //$onboardingSurvey->load('survey'); // Eager load the associated survey
+        //return response()->json($onboardingSurvey->load('survey'));
+        Log::info('Fetching onboarding survey data for ' . $id);
 
+        $onboardingSurvey = OnboardingSurvey::with('survey')->findOrFail($id);
 
-        // return response()->json([
-        //     'message' => 'Successfully fetched Onboarding Survey',
-        //     'onboarding_survey' => $onboardingSurvey,
-        //]);
+        return response()->json($onboardingSurvey);
+
+        return response()->json([
+            'message' => 'Successfully fetched Onboarding Survey',
+            'onboarding_survey' => $onboardingSurvey,
+        ]);
     }
 
     public function update(Request $request, OnboardingSurvey $onboardingSurvey)
@@ -91,19 +96,19 @@ class OnboardingSurveyController extends Controller
             'phone' => 'nullable|string',
             'material_due' => 'nullable|string',
         ]);
+        $survey = $onboardingSurvey->survey;
 
-        // Update Survey record
-        $survey = Survey::find($onboardingSurvey->survey_id);
+        //$survey = Survey::find($onboardingSurvey->survey_id);
         if (!$survey) {
             return response()->json(['error' => 'Survey not found'], 404);
         }
+        Log::info('Survey ID:', ['survey_id' => $onboardingSurvey->survey_id]);
 
         $survey->update([
             'applicant_name' => $validatedData['applicant_name'],
             'cohort_tag' => $validatedData['cohort_tag'],
             'company_name' => $validatedData['company_name']
         ]);
-        
         $lastCohort = Cohort::latest('id')->first();
         if ($lastCohort) {
             $validatedData['cohort_id'] = $lastCohort->id;
