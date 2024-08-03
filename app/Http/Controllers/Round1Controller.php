@@ -30,7 +30,6 @@ public function getByCohort($cohortId)
     {
         try {
             Log::info('Request data:', $request->all());
-
             // Validate request data for applicants table
             $applicantData = $request->validate([
                 'first_name' => 'required|string',
@@ -38,7 +37,6 @@ public function getByCohort($cohortId)
                 'email' => 'required|email|unique:applicants,email',
                 'company_name' => 'required|string',
             ]);
-
             // Get the last cohort ID
             $lastCohort = Cohort::latest('id')->first();
             if (!$lastCohort) {

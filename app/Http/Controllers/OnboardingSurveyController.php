@@ -25,50 +25,46 @@ class OnboardingSurveyController extends Controller
         ]);
     }
 
-    public function store(Request $request)
-{
-    $validatedData = $request->validate([
-        'applicant_name' => 'required|string',
-        'cohort_tag' => 'required|string',
-        'company_name' => 'required|string',
-        'email' => 'nullable|email',
-        'phone' => 'nullable|string',
-        'material_due' => 'nullable|date',
-    ]);
+        public function store(Request $request)
+        {
+            $validatedData = $request->validate([
+                'applicant_name' => 'required|string',
+                'cohort_tag' => 'required|string',
+                'company_name' => 'required|string',
+            ]);
+            $validatedData2 = $request->validate([
+                'email' => 'nullable|email',
+                'phone' => 'nullable|string',
+                'material_due' => 'nullable|date',
+            ]);
+            $lastCohort = Cohort::latest('id')->first();
+            if ($lastCohort) {
+                $validatedData['cohort_id'] = $lastCohort->id;
+                $validatedData2['cohort_id'] = $lastCohort->id;
+            } else {
+                return response()->json([
+                    'message' => 'No cohort found'
+                ], 400);
+            }           
+             $survey = Survey::create($validatedData);
 
-    // Retrieve the last inserted cohort_id from the cohort table
-    $lastCohort = Cohort::latest('id')->first();
-    if ($lastCohort) {
-        $validatedData['cohort_id'] = $lastCohort->id;
-    } else {
-        return response()->json([
-            'message' => 'No cohort found'
-        ], 400);
-    }
+            $survey->applicant_name = $validatedData['applicant_name'];
+            $survey->cohort_tag = $validatedData['cohort_tag'];
+            $survey->company_name = $validatedData['company_name'];
+            $survey->save();
 
-    // Create or update Survey record
-    $survey = Survey::updateOrCreate(
-    ['applicant_name' => $validatedData['applicant_name'],
-     'cohort_tag' => $validatedData['cohort_tag'],
-     'company_name' => $validatedData['company_name'],
-     'cohort_id' => $lastCohort->id
-    ],
-    );
-
-    // Create OnboardingSurvey record linked to Survey
-    $onboardingSurvey = OnboardingSurvey::create([
-        'survey_id' => $survey->id,
-        'email' => $validatedData['email'],
-        'phone' => $validatedData['phone'],
-        'material_due' => $validatedData['material_due'],
-       'cohort_id' => $validatedData['cohort_id'],
-    ]);
-
-    return response()->json([
-        'message' => 'Onboarding Survey created successfully',
-        'onboarding_survey' => $onboardingSurvey,
-    ], 201);
-}
+           Log::info('Created Survey:', $survey->toArray());
+         $validatedData2['survey_id'] = $survey->id;
+          $onboardingSurvey = OnboardingSurvey::create($validatedData2);
+         Log::info('Created Onboarding Survey:', $onboardingSurvey->toArray());
+        
+            return response()->json([
+                'message' => 'Onboarding Survey created successfully',
+                'onboarding_survey' => $onboardingSurvey,
+                'survey' => $survey
+            ], 201);
+        }
+        
 
     public function show(OnboardingSurvey $onboardingSurvey, $id)
     {
@@ -99,16 +95,22 @@ class OnboardingSurveyController extends Controller
             'material_due' => 'nullable|string',
         ]);
 
-        if (!$survey) {
+        if (!$survey) 
+        {
             return response()->json(['error' => 'Survey not found'], 404);
+        } 
+        else
+        {
+            $survey->applicant_name = $validatedData['applicant_name'];
+            $survey->cohort_tag = $validatedData['cohort_tag'];
+            $survey->company_name = $validatedData['company_name'];
+            $survey->save();
         }
-        Log::info('Survey ID:', ['survey_id' => $onboardingSurvey->survey_id]);
-
-        $survey->update([
-            'applicant_name' => $validatedData['applicant_name'],
-            'cohort_tag' => $validatedData['cohort_tag'],
-            'company_name' => $validatedData['company_name']
-        ]);
+        // $survey->update([
+        //     'applicant_name' => $validatedData['applicant_name'],
+        //     'cohort_tag' => $validatedData['cohort_tag'],
+        //     'company_name' => $validatedData['company_name']
+        // ]);
         $lastCohort = Cohort::latest('id')->first();
         if ($lastCohort) {
             $validatedData['cohort_id'] = $lastCohort->id;
@@ -127,6 +129,7 @@ class OnboardingSurveyController extends Controller
         return response()->json([
             'message' => 'Onboarding Survey updated successfully',
             'onboarding_survey' => $onboardingSurvey,
+            'survey'=> $survey
         ]);
     }
 

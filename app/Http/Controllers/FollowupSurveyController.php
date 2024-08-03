@@ -62,13 +62,12 @@ class FollowupSurveyController extends Controller
         ], 400);
     }
 
-    // Create a new survey entry (super entity)
     $survey = Survey::create($validatedSurveyData);
-
-    // Add the survey_id to the validated data for followup_survey
+    $survey->applicant_name = $validatedSurveyData['applicant_name'];
+    $survey->cohort_tag = $validatedSurveyData['cohort_tag'];
+    $survey->company_name = $validatedSurveyData['company_name'];
+    $survey->save();
     $validatedFollowupSurveyData['survey_id'] = $survey->id;
-
-    // Create the followup survey entry (sub-entity)
     $followupSurvey = FollowupSurvey::create($validatedFollowupSurveyData);
 
     return response()->json([
@@ -111,7 +110,7 @@ class FollowupSurveyController extends Controller
     $validatedSurveyData = $request->validate([
         'applicant_name' => 'required|string',
         'cohort_tag' => 'required|string',
-        'company_name' => 'nullable|string'
+        'company_name' => 'required|string'
     ]);
     $validatedFollowupSurveyData = $request->validate([
         'date' => 'required|date',
@@ -121,6 +120,10 @@ class FollowupSurveyController extends Controller
 
     if ($survey) {
         $survey->update($validatedSurveyData);
+        $survey->applicant_name = $validatedSurveyData['applicant_name'];
+        $survey->cohort_tag = $validatedSurveyData['cohort_tag'];
+        $survey->company_name = $validatedSurveyData['company_name'];
+        $survey->save();
     }
     $followupSurvey->update($validatedFollowupSurveyData);
 
