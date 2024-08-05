@@ -5,8 +5,11 @@ namespace App\Http\Controllers;
 use App\Models\Applicant;
 use App\Models\Cohort;
 use App\Models\Round1;
+use App\Models\User;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Log;
+use App\Notifications\NewApplicantNotification;
+use Illuminate\Support\Facades\Notification;
 
 class Round1Controller extends Controller
 {
@@ -26,7 +29,7 @@ public function getByCohort($cohortId)
         return response()->json($round1s);
     }
 
-    public function store(Request $request)
+    public function store(Request $request, User $user )
     {
         try {
             Log::info('Request data:', $request->all());
@@ -47,6 +50,12 @@ public function getByCohort($cohortId)
             // Create an applicant entry
             $applicant = Applicant::create($applicantData);
             Log::info('Applicant created:', ['applicant_id' => $applicant->id]);
+           // Notification::send($user, new NewApplicantNotification($applicant));
+
+           //$user->notify(new NewApplicantNotification($applicant));
+
+           Notification::route('mail', 'mariam.mohamed812002@gmail.com')->notify(new NewApplicantNotification($applicant));
+
 
             // Validate request data for round1s table
             $round1Data = $request->validate([
