@@ -16,7 +16,8 @@ use App\Http\Controllers\AdminController;
 use App\Http\Controllers\Auth\RegisteredUserController;
 use App\Http\Controllers\Auth\AuthenticatedSessionController;
 
-Route::post('/register', [RegisteredUserController::class, 'store']) ->middleware('guest')->name('register');
+Route::post('/register', [RegisteredUserController::class, 'store'])->middleware('guest')->name('register');
+
 Route::post('/login', [AuthenticatedSessionController::class, 'store']);
 Route::post('round1/create', [Round1Controller::class, 'store']);
 Route::post('round2/create', [Round2Controller::class, 'store']);
@@ -24,7 +25,14 @@ Route::post('followupSurvey/create', [FollowupSurveyController::class, 'store'])
 Route::post('onboardingSurvey/create', [OnboardingSurveyController::class, 'store']);
 
 Route::middleware('auth:sanctum')->group(function () {
-    
+    //Route::post('/register', [RegisteredUserController::class, 'store']);
+    Route::put('/admin/edit/{id}', [RegisteredUserController::class, 'update']);
+    Route::get('/admin/{id}', [RegisteredUserController::class, 'show']);
+    Route::get('/admins', [RegisteredUserController::class, 'index']);
+    Route::delete('/admin/{id}', [RegisteredUserController::class, 'destroy']);
+
+
+
          Route::put('round1/{id}', [Round1Controller::class, 'update']);
          Route::get('round1/{id}', [Round1Controller::class, 'show']);
          Route::delete('round1/{id}', [Round1Controller::class, 'destroy']);
