@@ -18,6 +18,10 @@ class applicant extends Model
         'company_name',
         'cohort_id'
     ];
+    public function comments()
+{
+    return $this->hasMany(Comment::class);
+}
     public function round1()
     {
         return $this->hasMany(Round1::class, 'applicant_id');

@@ -50,6 +50,10 @@ class round2 extends Model
         'team_identifiers',
         'if_other_team_identifiers',
     ];
+    public function comments()
+{
+    return $this->hasMany(Comment::class);
+}
     public function applicant()
     {
         return $this->belongsTo(Applicant::class);

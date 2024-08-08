@@ -37,7 +37,10 @@ class Round1 extends Model
         'additional_demographics',
         'team_identifiers'
     ];
-
+    public function comments()
+    {
+        return $this->hasMany(Comment::class);
+    }
     /**
      * Get the applicant that owns the round1 entry.
      */
