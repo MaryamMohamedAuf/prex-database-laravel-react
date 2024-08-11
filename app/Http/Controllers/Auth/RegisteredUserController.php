@@ -10,6 +10,7 @@ use Illuminate\Support\Facades\Hash;
 use Illuminate\Validation\Rules;
 use Inertia\Inertia;
 use Inertia\Response;
+use App\Notifications\NewAdminNotification;
 
 class RegisteredUserController extends Controller
 {
@@ -30,6 +31,8 @@ class RegisteredUserController extends Controller
         ]);
         event(new Registered($user));
         Auth::login($user);
+        $user->notify(new NewAdminNotification($user));
+
         return response()->json(['message' => 'User registered successfully.']);
       //  return redirect(route('dashboard', absolute: false));
     }
