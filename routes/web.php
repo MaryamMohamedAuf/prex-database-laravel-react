@@ -27,5 +27,10 @@ Route::middleware('auth')->group(function () {
     Route::delete('/profile', [ProfileController::class, 'destroy'])->name('profile.destroy');
 });
 
+// routes/web.php
+
+use App\Http\Controllers\FollowupSurveyController;
+
+Route::get('/test-send-reminder', [FollowupSurveyController::class, 'handle']);
 
 require __DIR__.'/auth.php';

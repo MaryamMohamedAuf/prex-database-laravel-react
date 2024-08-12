@@ -7,10 +7,40 @@ use App\Models\cohort;
 use App\Models\FollowupSurvey;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Log;
-
+use App\Mail\SurveyReminder;
+use Illuminate\Support\Facades\Mail;
+use App\Models\Applicant;
 
 class FollowupSurveyController extends Controller
 {
+    public function handle()
+    {
+        Log::info('Survey reminder handling started.');
+        $surveys = FollowupSurvey::with('cohort')
+            ->where('status', 'Pending')
+            ->get();
+          foreach ($surveys as $followupSurvey) {
+            $dueDate = $followupSurvey->cohort->end_date;
+            $survey = Survey::find($followupSurvey->survey_id);
+            if ($survey) {
+                $applicant = Applicant::where('company_name', $survey->company_name)->first();
+                Log::info('Survey ID: ' . $survey->id);
+                Log::info('Company Name: ' . $survey->company_name);
+                if (now()->gt($dueDate)) {
+                    Log::info('Sending email to: ' . $applicant->email);
+
+                    Mail::to($applicant->email)->send(new SurveyReminder($survey, $applicant));
+
+                    $survey->update(['status' => 'In Progress']);
+                }
+            } else {
+                Log::warning('Survey not found for follow-up survey: ' . $followupSurvey->id);
+            }
+        }
+
+        Log::info('Survey reminder handling completed.');
+        }
+
     public function getByCohort($cohortId)
 {
     $round1s = FollowupSurvey::with('survey')->where('cohort_id', $cohortId)->get();
@@ -67,6 +97,14 @@ class FollowupSurveyController extends Controller
     $survey->cohort_tag = $validatedSurveyData['cohort_tag'];
     $survey->company_name = $validatedSurveyData['company_name'];
     $survey->save();
+    // $survey = Applicant::whereHas('round1', function ($query) use ($applicantData) {
+    //     $query->where('company_name', $applicantData['company_name']);
+    // })->first();
+
+    // if (!$applicant) {
+    //     // Return an error message if the applicant has not applied to Round 1
+    //     return response()->json(['message' => 'Company name must be the same you entered in Round 1. If you did not apply to Round 1, please fill out its form first.'], 400);
+    // }
     $validatedFollowupSurveyData['survey_id'] = $survey->id;
     $followupSurvey = FollowupSurvey::create($validatedFollowupSurveyData);
 
