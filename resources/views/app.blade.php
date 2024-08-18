@@ -11,6 +11,14 @@
         <!-- Fonts -->
         <link rel="preconnect" href="https://fonts.bunny.net">
         <link href="https://fonts.bunny.net/css?family=figtree:400,500,600&display=swap" rel="stylesheet" />
+        
+        <form action="{{ route('locale.switch') }}" method="POST">
+    @csrf
+    <select name="locale" onchange="this.form.submit()">
+        <option value="en" {{ app()->getLocale() == 'en' ? 'selected' : '' }}>English</option>
+        <option value="ar" {{ app()->getLocale() == 'ar' ? 'selected' : '' }}>عربي</option>
+    </select>
+</form>
 
         <!-- Scripts -->
         @routes

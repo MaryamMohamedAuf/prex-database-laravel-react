@@ -8,6 +8,7 @@ use Illuminate\Database\Eloquent\Model;
 class round2 extends Model
 {
     use HasFactory;
+
     protected $fillable = [
         'applicant_id',
         'cohort_id',
@@ -50,14 +51,17 @@ class round2 extends Model
         'team_identifiers',
         'if_other_team_identifiers',
     ];
+
     public function comments()
-{
-    return $this->hasMany(Comment::class);
-}
+    {
+        return $this->hasMany(Comment::class);
+    }
+
     public function applicant()
     {
         return $this->belongsTo(Applicant::class);
     }
+
     public function cohort()
     {
         return $this->belongsTo(Cohort::class);

@@ -1,95 +1,99 @@
 <?php
+
 namespace App\Http\Controllers;
 
+use App\Http\Requests\CohortRequest;
 use App\Models\Cohort;
-use Illuminate\Http\Request;
-use Illuminate\Support\Facades\Storage;
-use Illuminate\Support\Facades\log;
-
-use Inertia\Inertia;
+use App\Services\CohortService;
 
 class CohortController extends Controller
 {
-    
+    protected $cohortService;
+
+    /**
+     * Create a new controller instance.
+     */
+    public function __construct(CohortService $cohortService)
+    {
+        $this->cohortService = $cohortService;
+    }
+
+    /**
+     * Display a listing of the cohorts.
+     *
+     * @return \Illuminate\Http\JsonResponse
+     */
     public function index()
     {
-        $user = auth()->user();
-        $cohorts = Cohort::all();
-      // return Inertia::render('cohorts/index', ['cohorts' => $cohorts]);
-       return response()->json($cohorts);
+        $cohorts = $this->cohortService->getAllCohorts();
+
+        return response()->json($cohorts);
     }
 
-    public function create()
-     {
-       return Inertia::render('cohorts/create');
-    
-     }
-     
-    public function store(Request $request)
+    /**
+     * Store a newly created cohort in storage.
+     *
+     * @return \Illuminate\Http\JsonResponse
+     */
+    public function store(CohortRequest $request)
     {
-        $user = auth()->user();
-        $validatedData = $request->validate([
-            'number' => 'required|integer',
-            'start_date' => 'required|date',
-            'end_date' => 'required|date',
-        ]);
-    
-        $cohort = Cohort::create($validatedData);
+        $cohort = $this->cohortService->createCohort($request->validated());
 
-        /////////////
-        $cohort = Cohort::find(1);
-$round2s = $cohort->round2s;
-
-foreach ($round2s as $round2) {
-    echo $round2->some_attribute;
-}
-////////////////////
-    
-       // return redirect()->route('cohorts.index')->with('success', 'Cohort created successfully.');
-           // $cohort = Cohort::create($request->all());
-    
         return response()->json([
             'message' => 'Cohort created successfully',
-            'cohort' => $cohort
+            'cohort' => $cohort,
         ], 201);
     }
-    
-    public function show($id)
+
+    /**
+     * Display the specified cohort.
+     *
+     * @return \Illuminate\Http\JsonResponse
+     */
+    public function show(int $id)
     {
-        $cohort = Cohort::with(['applicants', 'onboardingSurveys', 'followupSurveys', 'round1s', 'round2s', 'round3s'])->findOrFail($id);
+        $cohort = $this->cohortService->getCohortById($id);
+
         return response()->json($cohort);
     }
 
-    public function edit($id)
-    {
-        $cohort = Cohort::findOrFail($id);
-        return response()->json($cohort);
-    }
+    /**
+     * Show the form for editing the specified cohort.
+     *
+     * @return \Illuminate\Http\JsonResponse
+     */
+    // public function edit(int $id)
+    // {
+    //     $cohort = $this->cohortService->getCohortById($id);
+    //     return response()->json($cohort);
+    // }
 
-    public function update(Request $request, $id)
+    /**
+     * Update the specified cohort in storage.
+     *
+     * @return \Illuminate\Http\JsonResponse
+     */
+    public function update(CohortRequest $request, int $id)
     {
-        $validatedData = $request->validate([
-            'number' => 'required|integer',
-            'start_date' => 'required|date',
-            'end_date' => 'required|date',
-        ]);
-
-        $cohort = Cohort::findOrFail($id);
-        $cohort->update($validatedData);
+        $cohort = $this->cohortService->updateCohort($id, $request->validated());
 
         return response()->json([
             'message' => 'Cohort updated successfully',
-            'cohort' => $cohort
+            'cohort' => $cohort,
         ], 200);
     }
 
-    public function destroy($id)
+    /**
+     * Remove the specified cohort from storage.
+     *
+     * @return \Illuminate\Http\JsonResponse
+     */
+    public function destroy(int $id)
     {
-        $cohort = Cohort::findOrFail($id);
-        $cohort->delete();
+        $this->cohortService->deleteCohort($id);
 
         return response()->json([
-            'message' => 'Cohort deleted successfully'
+            'message' => 'Cohort deleted successfully',
         ], 200);
     }
 }

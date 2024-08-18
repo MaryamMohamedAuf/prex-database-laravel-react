@@ -1,4 +1,5 @@
 <?php
+
 namespace App\Http\Controllers;
 
 use App\Models\Admin;
@@ -12,7 +13,6 @@ class AdminController extends Controller
     /**
      * Register a new admin.
      *
-     * @param \Illuminate\Http\Request $request
      * @return \Illuminate\Http\JsonResponse
      */
     public function register(Request $request)
@@ -35,7 +35,6 @@ class AdminController extends Controller
     /**
      * Login an admin.
      *
-     * @param \Illuminate\Http\Request $request
      * @return \Illuminate\Http\JsonResponse
      */
     public function login(Request $request)
@@ -47,15 +46,15 @@ class AdminController extends Controller
 
         $credentials = $request->only('email', 'password');
 
-        if (!Auth::guard('admin')->attempt($credentials)) {
+        if (! Auth::guard('admin')->attempt($credentials)) {
             throw ValidationException::withMessages([
                 'email' => ['The provided credentials are incorrect.'],
             ]);
         }
 
         $admin = Auth::guard('admin')->user();
-       // $token = $admin->createToken('admin-token')->plainTextToken;
+        // $token = $admin->createToken('admin-token')->plainTextToken;
 
-      //  return response()->json(['token' => $token], 200);
+        //  return response()->json(['token' => $token], 200);
     }
 }

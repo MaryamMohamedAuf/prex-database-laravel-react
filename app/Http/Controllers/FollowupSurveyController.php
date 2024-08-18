@@ -1,196 +1,102 @@
 <?php
+
 namespace App\Http\Controllers;
 
-use App\Models\Survey;
-use App\Models\cohort;
-
-use App\Models\FollowupSurvey;
-use Illuminate\Http\Request;
+use App\Http\Requests\FollowupSurveyRequest;
+use App\Http\Requests\SurveyRequest;
+use App\Services\FollowupSurveyService;
+use App\Services\SurveyService;
 use Illuminate\Support\Facades\Log;
-use App\Mail\SurveyReminder;
-use Illuminate\Support\Facades\Mail;
-use App\Models\Applicant;
 
 class FollowupSurveyController extends Controller
 {
-    public function handle()
+    protected $followupSurveyService;
+
+    protected $surveyService;
+
+    public function __construct(FollowupSurveyService $followupSurveyService, SurveyService $surveyService)
+    {
+        $this->followupSurveyService = $followupSurveyService;
+        $this->surveyService = $surveyService;
+    }
+
+    public function handleSurveyReminders()
     {
         Log::info('Survey reminder handling started.');
-        $surveys = FollowupSurvey::with('cohort')
-            ->where('status', 'Pending')
-            ->get();
-          foreach ($surveys as $followupSurvey) {
-            $dueDate = $followupSurvey->cohort->end_date;
-            $survey = Survey::find($followupSurvey->survey_id);
-            if ($survey) {
-                $applicant = Applicant::where('company_name', $survey->company_name)->first();
-                Log::info('Survey ID: ' . $survey->id);
-                Log::info('Company Name: ' . $survey->company_name);
-                if (now()->gt($dueDate)) {
-                    Log::info('Sending email to: ' . $applicant->email);
 
-                    Mail::to($applicant->email)->send(new SurveyReminder($survey, $applicant));
-
-                    $survey->update(['status' => 'In Progress']);
-                }
-            } else {
-                Log::warning('Survey not found for follow-up survey: ' . $followupSurvey->id);
-            }
-        }
+        $this->followupSurveyService->handle();
 
         Log::info('Survey reminder handling completed.');
-        }
+
+        return response()->json(['message' => 'Survey reminders processed successfully.']);
+    }
 
     public function getByCohort($cohortId)
-{
-    $round1s = FollowupSurvey::with('survey')->where('cohort_id', $cohortId)->get();
-    return response()->json($round1s);
-}
-    /**
-     * Display a listing of the resource.
-     */
-    public function index()
     {
-        $followupSurveys = FollowupSurvey::with('survey')->get();
+        $followupSurveys = $this->followupSurveyService->getByCohort($cohortId);
+
         return response()->json($followupSurveys);
     }
 
-    /**
-     * Show the form for creating a new resource.
-     */
-    public function create()
+    public function index()
     {
-        //
+        $followupSurveys = $this->followupSurveyService->getAllFollowupSurveys();
+
+        return response()->json($followupSurveys);
     }
 
-    /**
-     * Store a newly created resource in storage.
-     */
-    public function store(Request $request)
-{
-    $validatedSurveyData = $request->validate([
-        'applicant_name' => 'required|string',
-        'company_name' => 'required|string',
-        'cohort_tag' => 'required|string'
-    ]);
+    public function store(FollowupSurveyRequest $followupSurveyRequest, SurveyRequest $surveyRequest)
+    {
+        // Validate the SurveyRequest data and create the Survey
+        $validatedSurveyData = $surveyRequest->validated();
+        $survey = $this->surveyService->createSurvey($validatedSurveyData);
+        Log::info('Survey Request Data:', $surveyRequest->all());
 
-    $validatedFollowupSurveyData = $request->validate([
-        'date' => 'required|date',
-        'survey_tag' => 'required|string',
-        'status' => 'required|in:Completed,Pending,In Progress',
-    ]);
+        // Pass the survey_id and cohort_id to FollowupSurveyRequest
+        $followupSurveyData = $followupSurveyRequest->validated();
+        $followupSurveyData['survey_id'] = $survey->id;
+        $followupSurveyData['cohort_id'] = $survey->cohort_id;
+        // Create the FollowupSurvey using the validated data
+        $followupSurvey = $this->followupSurveyService->createFollowupSurvey($followupSurveyData);
+        Log::info('Follow-up Survey Request Data:', $followupSurveyRequest->all());
 
-    // Retrieve the last inserted cohort_id from the cohort table
-    $lastCohort = Cohort::latest('id')->first();
-    if ($lastCohort) {
-        $validatedFollowupSurveyData['cohort_id'] = $lastCohort->id;
-        $validatedSurveyData['cohort_id'] = $lastCohort->id;
-
-    } else {
         return response()->json([
-            'message' => 'No cohort found'
-        ], 400);
+            'message' => 'Follow-up survey created successfully',
+            'followupSurvey' => $followupSurvey,
+            'survey' => $survey,
+        ], 201);
     }
 
-    $survey = Survey::create($validatedSurveyData);
-    $survey->applicant_name = $validatedSurveyData['applicant_name'];
-    $survey->cohort_tag = $validatedSurveyData['cohort_tag'];
-    $survey->company_name = $validatedSurveyData['company_name'];
-    $survey->save();
-    // $survey = Applicant::whereHas('round1', function ($query) use ($applicantData) {
-    //     $query->where('company_name', $applicantData['company_name']);
-    // })->first();
-
-    // if (!$applicant) {
-    //     // Return an error message if the applicant has not applied to Round 1
-    //     return response()->json(['message' => 'Company name must be the same you entered in Round 1. If you did not apply to Round 1, please fill out its form first.'], 400);
-    // }
-    $validatedFollowupSurveyData['survey_id'] = $survey->id;
-    $followupSurvey = FollowupSurvey::create($validatedFollowupSurveyData);
-
-    return response()->json([
-        'message' => 'Followup Survey created successfully',
-        'followup_survey' => $followupSurvey,
-        'survey' => $survey, // return the created survey as well
-    ], 201);
-}
-    
-
-    /**
-     * Display the specified resource.
-     */
-    public function show(FollowupSurvey $followupSurvey ,$id)
+    public function show(int $id)
     {
-       // return response()->json($followupSurvey->load('survey'));
-        Log::info('Fetching follow up survey data for ' . $id);
+        $followupSurvey = $this->followupSurveyService->getFollowupSurveyById($id);
+        $survey_id = $followupSurvey->survey_id;
+        $survey = $this->surveyService->getSurveyById($survey_id);
 
-        $followupSurvey = FollowupSurvey::with('survey')->findOrFail($id);
-
-        return response()->json($followupSurvey);
-    }
-
-    /**
-     * Show the form for editing the specified resource.
-     */
-    public function edit(FollowupSurvey $followupSurvey)
-    {
-        //
-    }
-
-    /**
-     * Update the specified resource in storage.
-     */
-    public function update(Request $request, FollowupSurvey $followupSurvey, $id)
-{
-    $followupSurvey = followupSurvey::findOrFail($id);
-    $survey = Survey::find($followupSurvey->survey_id);
-
-    $validatedSurveyData = $request->validate([
-        'applicant_name' => 'required|string',
-        'cohort_tag' => 'required|string',
-        'company_name' => 'required|string'
-    ]);
-    $validatedFollowupSurveyData = $request->validate([
-        'date' => 'required|date',
-        'survey_tag' => 'required|string',
-        'status' => 'required|in:Completed,Pending,In Progress',
-    ]);
-
-    if ($survey) {
-        $survey->update($validatedSurveyData);
-        $survey->applicant_name = $validatedSurveyData['applicant_name'];
-        $survey->cohort_tag = $validatedSurveyData['cohort_tag'];
-        $survey->company_name = $validatedSurveyData['company_name'];
-        $survey->save();
-    }
-    $followupSurvey->update($validatedFollowupSurveyData);
-
-    return response()->json([
-        'message' => 'Followup Survey and associated Survey updated successfully',
-        'followup_survey' => $followupSurvey,
-        'survey' => $survey, // Optionally return the updated survey as well
-    ]);
-}
-
-    /**
-     * Remove the specified resource from storage.
-     */
-    public function destroy(FollowupSurvey $followupSurvey, $id)
-    {
-        $followupSurvey = FollowupSurvey::findOrFail($id);
-        $survey = Survey::find($followupSurvey->survey_id);
-    
-        // Delete the followup survey
-        $followupSurvey->delete();
-    
-        // Delete the associated survey if found
-        if ($survey) {
-            $survey->delete();
-        }
-    
         return response()->json([
-            'message' => 'Followup Survey and associated Survey deleted successfully'
-        ]);
+            'followup' => $followupSurvey,
+            'survey' => $survey,
+        ], 201);
     }
-    
+
+    public function update(SurveyRequest $request2, FollowupSurveyRequest $request, int $id)
+    {
+        $survey = $this->surveyService->updateSurvey($id, $request2->validated());
+        $followupSurvey = $this->followupSurveyService->updateFollowupSurvey($id, $request->validated());
+
+        return response()->json([
+            'message' => 'Follow-up survey updated successfully',
+            'followupSurvey' => $followupSurvey,
+            'survey' => $survey,
+        ], 200);
+    }
+
+    public function destroy(int $id)
+    {
+        $this->followupSurveyService->deleteFollowupSurvey($id);
+
+        return response()->json([
+            'message' => 'Follow-up survey deleted successfully',
+        ], 200);
+    }
 }

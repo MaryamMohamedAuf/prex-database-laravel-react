@@ -1,19 +1,19 @@
 <?php
 
-use App\Http\Controllers\CohortController;
+use App\Http\Controllers\LocaleController;
 use App\Http\Controllers\ProfileController;
 use Illuminate\Foundation\Application;
 use Illuminate\Support\Facades\Route;
 use Inertia\Inertia;
 
-Route::get('/cohorts', [CohortController::class, 'index'])->name('cohorts.index');
+Route::post('/locale/switch', [LocaleController::class, 'switch'])->name('locale.switch');
 
 Route::get('/', function () {
     return Inertia::render('Welcome', [
         'canLogin' => Route::has('login'),
         'canRegister' => Route::has('register'),
-         'laravelVersion' => Application::VERSION,
-         'phpVersion' => PHP_VERSION,
+        'laravelVersion' => Application::VERSION,
+        'phpVersion' => PHP_VERSION,
     ]);
 });
 

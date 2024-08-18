@@ -4,9 +4,8 @@ namespace App\Notifications;
 
 use App\Models\Applicant;
 use Illuminate\Bus\Queueable;
-use Illuminate\Notifications\Notification;
-use Illuminate\Contracts\Queue\ShouldQueue;
 use Illuminate\Notifications\Messages\MailMessage;
+use Illuminate\Notifications\Notification;
 
 class NewApplicantNotification extends Notification
 {
@@ -44,9 +43,9 @@ class NewApplicantNotification extends Notification
     public function toMail($notifiable)
     {
         return (new MailMessage)
-                    ->line('A new applicant has applied.')
-                    ->action('View Applicant', url('http://localhost:3000/applicant/' . $this->applicant->id))
-                    ->line('Thank you for using our application!');
+            ->line('A new applicant has applied.')
+            ->action('View Applicant', url('http://localhost:3000/applicant/'.$this->applicant->id))
+            ->line('Thank you for using our application!');
     }
 
     /**

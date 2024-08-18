@@ -39,7 +39,7 @@ return [
     |
     */
 
-   // 'debug' => (bool) env('APP_DEBUG', false),
+    // 'debug' => (bool) env('APP_DEBUG', false),
     'debug' => true,
 
     /*
@@ -124,18 +124,17 @@ return [
         'store' => env('APP_MAINTENANCE_STORE', 'database'),
 
     ],
-    
-    'api' => [
-    \Laravel\Sanctum\Http\Middleware\EnsureFrontendRequestsAreStateful::class,
-    'throttle:api',
-    \Illuminate\Routing\Middleware\SubstituteBindings::class,
-],
 
-//'providers' => [
+    'api' => [
+        \Laravel\Sanctum\Http\Middleware\EnsureFrontendRequestsAreStateful::class,
+        'throttle:api',
+        \Illuminate\Routing\Middleware\SubstituteBindings::class,
+    ],
+
+    //'providers' => [
     // Other service providers...
 
-   // Laravel\Sanctum\SanctumServiceProvider::class,
-//],
-
+    // Laravel\Sanctum\SanctumServiceProvider::class,
+    //],
 
 ];

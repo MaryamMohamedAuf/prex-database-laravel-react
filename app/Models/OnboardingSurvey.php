@@ -8,8 +8,9 @@ use Illuminate\Database\Eloquent\Model;
 class OnboardingSurvey extends Model
 {
     use HasFactory;
+
     protected $fillable = [
-        'survey_id', 'email', 'phone', 'material_due', 'cohort_id'
+        'survey_id', 'email', 'phone', 'material_due', 'cohort_id',
 
     ];
 
@@ -18,6 +19,7 @@ class OnboardingSurvey extends Model
     {
         return $this->belongsTo(Survey::class);
     }
+
     public function cohort()
     {
         return $this->belongsTo(Cohort::class);

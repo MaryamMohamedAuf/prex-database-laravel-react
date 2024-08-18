@@ -7,21 +7,23 @@ use Illuminate\Database\Eloquent\Model;
 use Illuminate\Notifications\Notifiable;
 use Laravel\Sanctum\HasApiTokens;
 
-
 class applicant extends Model
 {
-    use HasFactory, HasApiTokens, Notifiable;
+    use HasApiTokens, HasFactory, Notifiable;
+
     protected $fillable = [
         'first_name',
         'last_name',
         'email',
         'company_name',
-        'cohort_id'
+        'cohort_id',
     ];
+
     public function comments()
-{
-    return $this->hasMany(Comment::class);
-}
+    {
+        return $this->hasMany(Comment::class);
+    }
+
     public function round1()
     {
         return $this->hasMany(Round1::class, 'applicant_id');
@@ -41,5 +43,4 @@ class applicant extends Model
     {
         return $this->belongsTo(Cohort::class);
     }
-
 }

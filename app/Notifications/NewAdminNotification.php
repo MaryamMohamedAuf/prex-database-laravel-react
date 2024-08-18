@@ -25,13 +25,13 @@ class NewAdminNotification extends Notification
     public function toMail($notifiable)
     {
         return (new MailMessage)
-                    ->subject('Your Admin Account has been Created')
-                    ->greeting('Hello ' . $this->user->name . ',')
-                    ->line('Your admin account has been successfully created.')
-                    ->line('You can now log in using your email: ' . $this->user->email.'password')
-                    ->action('Login', url('http://localhost:3000/'))
-                    ->line('Please log in and change your password as soon as possible.')
-                    ->line('Thank you for being part of our platform!');
+            ->subject('Your Admin Account has been Created')
+            ->greeting('Hello '.$this->user->name.',')
+            ->line('Your admin account has been successfully created.')
+            ->line('You can now log in using your email: '.$this->user->email.'  password')
+            ->action('Login', url('http://localhost:3000/'))
+            ->line('Please log in and change your password as soon as possible.')
+            ->line('Thank you for being part of our platform!');
     }
 
     public function toArray($notifiable)

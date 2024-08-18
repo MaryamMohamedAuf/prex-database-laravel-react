@@ -7,11 +7,9 @@ use App\Http\Requests\Auth\LoginRequest;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
-use Illuminate\Support\Facades\log;
 use Illuminate\Support\Facades\Route;
 use Inertia\Inertia;
 use Inertia\Response;
-use App\Models\User;
 
 class AuthenticatedSessionController extends Controller
 {
@@ -35,26 +33,26 @@ class AuthenticatedSessionController extends Controller
         $request->authenticate();
         $request->session()->regenerate();
         $user = Auth::user();
-       //$tokenName = $request->input('token_name', 'default-token');
-    
-      // $token = $user->createToken($tokenName)->plainTextToken;
-    $userId = $user->id;
-       //dd($tokenName);
+        //$tokenName = $request->input('token_name', 'default-token');
+
+        // $token = $user->createToken($tokenName)->plainTextToken;
+        $userId = $user->id;
+        //dd($tokenName);
         $token = $request->user()->createToken($request->token_name);
-     //   return ['token' => $token->plainTextToken && $userId];
-    return response()->json([
-        'message' => 'Logged in successfully',
-        'token' => $token->plainTextToken,
-        'userId'=>$userId
-    ]);
+
+        // return ['token' => $token->plainTextToken && $userId];
+        return response()->json([
+            'message' => 'Logged in successfully',
+            'token' => $token->plainTextToken,
+            'userId' => $userId,
+        ]);
     }
 
     /**
      * Destroy an authenticated session.
      */
     public function destroy(Request $request)
-        //: RedirectResponse
-
+    //: RedirectResponse
     {
         Auth::guard('web')->logout();
 

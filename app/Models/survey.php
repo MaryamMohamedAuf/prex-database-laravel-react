@@ -1,4 +1,5 @@
 <?php
+
 namespace App\Models;
 
 use Illuminate\Database\Eloquent\Factories\HasFactory;
@@ -9,10 +10,10 @@ class Survey extends Model
     use HasFactory;
 
     protected $fillable = [
-        'applicant_name',        
-        'comapny_name',
+        'applicant_name',
+        'company_name',
         'cohort_id',
-        'cohort_tag'
+        'cohort_tag',
     ];
 
     public function followupSurveys()
@@ -20,11 +21,13 @@ class Survey extends Model
         return $this->hasMany(FollowupSurvey::class);
 
     }
+
     public function onboardingSurveys()
     {
         return $this->hasMany(OnboardingSurvey::class);
 
     }
+
     public function cohort()
     {
         return $this->belongsTo(Cohort::class);

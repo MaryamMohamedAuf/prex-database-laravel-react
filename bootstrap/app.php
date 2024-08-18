@@ -17,44 +17,38 @@ return Application::configure(basePath: dirname(__DIR__))
             \Illuminate\Http\Middleware\AddLinkHeadersForPreloadedAssets::class,
             \App\Http\Middleware\CorsMiddleware::class,
             \App\Http\Middleware\VerifyCsrfToken::class,
+            \App\Http\Middleware\SetLocale::class,
         ]);
 
-
-        $middleware->api(append:  [
-      \Laravel\Sanctum\Http\Middleware\EnsureFrontendRequestsAreStateful::class,
-        //'throttle:api',
-        //The throttle middleware is used for rate limiting, 
-        //which controls how many requests a user can make to the API within a specified time frame.
-         \Illuminate\Routing\Middleware\SubstituteBindings::class,
-         \Illuminate\Session\Middleware\StartSession::class,
-         \Illuminate\View\Middleware\ShareErrorsFromSession::class,
-        // \App\Http\Middleware\VerifyCsrfToken::class,
+        $middleware->api(append: [
+            \Laravel\Sanctum\Http\Middleware\EnsureFrontendRequestsAreStateful::class,
+            //'throttle:api',
+            //The throttle middleware is used for rate limiting,
+            //which controls how many requests a user can make to the API within a specified time frame.
+            \Illuminate\Routing\Middleware\SubstituteBindings::class,
+            \Illuminate\Session\Middleware\StartSession::class,
+            \Illuminate\View\Middleware\ShareErrorsFromSession::class,
+            // \App\Http\Middleware\VerifyCsrfToken::class,
 
         ]);
 
-        
         $middleware->validateCsrfTokens(except: [
-           'api*/',
+            'api*/',
             'cohorts/create',
             'api/login',
             'api/logout',
         ]);
 
         return $middleware;
-    
+
     })
 
-
-    
     ->withExceptions(function (Exceptions $exceptions) {
         //
     })->create();
 
-    $app->middleware([
-      //  \App\Http\Middleware\CorsMiddleware::class,
-      // \App\Http\Middleware\VerifyCsrfToken::class,
+$app->middleware([
+    //  \App\Http\Middleware\CorsMiddleware::class,
+    // \App\Http\Middleware\VerifyCsrfToken::class,
 
-    ]);
-
-
-   
+]);

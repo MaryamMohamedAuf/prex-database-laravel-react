@@ -8,11 +8,12 @@ use Illuminate\Database\Eloquent\Model;
 class round3 extends Model
 {
     use HasFactory;
+
     protected $fillable = [
         'applicant_id',
         'final_decision',
         'recorded_meeting_link',
-        'cohort_id'
+        'cohort_id',
 
     ];
 
@@ -20,6 +21,7 @@ class round3 extends Model
     {
         return $this->belongsTo(Applicant::class);
     }
+
     public function cohort()
     {
         return $this->belongsTo(Cohort::class);

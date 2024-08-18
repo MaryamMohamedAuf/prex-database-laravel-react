@@ -1,9 +1,11 @@
 <?php
+
 namespace App\Http\Controllers;
 
 use App\Models\Test;
 use Illuminate\Http\Request;
-use App\Models\Tests; // Assuming you're storing the data in the Applicant model
+
+// Assuming you're storing the data in the Applicant model
 
 class GoogleFormController extends Controller
 {

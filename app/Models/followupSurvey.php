@@ -1,4 +1,5 @@
 <?php
+
 namespace App\Models;
 
 use Illuminate\Database\Eloquent\Factories\HasFactory;
@@ -13,13 +14,14 @@ class FollowupSurvey extends Model
         'survey_tag',
         'survey_id',
         'status',
-        'cohort_id'
+        'cohort_id',
     ];
 
     public function survey()
     {
         return $this->belongsTo(Survey::class);
     }
+
     public function cohort()
     {
         return $this->belongsTo(Cohort::class);

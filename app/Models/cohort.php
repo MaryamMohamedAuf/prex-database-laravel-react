@@ -9,7 +9,8 @@ use Laravel\Sanctum\HasApiTokens;
 
 class cohort extends Model
 {
-    use HasFactory, HasApiTokens, Notifiable;
+    use HasApiTokens, HasFactory, Notifiable;
+
     protected $fillable = [
         'number',
         'start_date',
@@ -28,8 +29,8 @@ class cohort extends Model
 
     public function round1s()
     {
-       // return $this->hasManyThrough(Round1::class, Applicant::class);
-       return $this->hasMany(Round1::class);
+        // return $this->hasManyThrough(Round1::class, Applicant::class);
+        return $this->hasMany(Round1::class);
 
     }
 
@@ -42,6 +43,7 @@ class cohort extends Model
     {
         return $this->hasManyThrough(Round3::class, Applicant::class);
     }
+
     public function applicants()
     {
         return $this->hasMany(Applicant::class);

@@ -11,10 +11,8 @@ class applicant extends FormRequest
      */
     public function authorize(): bool
     {
-       return false;
+        return false;
     }
-    
-    
 
     /**
      * Get the validation rules that apply to the request.

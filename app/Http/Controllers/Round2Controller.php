@@ -2,228 +2,145 @@
 
 namespace App\Http\Controllers;
 
-use App\Models\Applicant;
-use App\Models\Cohort;
-use App\Models\Round2;
-use Illuminate\Http\Request;
+use App\Http\Requests\ApplicantRequest;
+use App\Http\Requests\Round2Request;
+use App\Services\ApplicantService;
+use App\Services\Round2Service;
 use Illuminate\Support\Facades\Log;
+use App\Models\Applicant;
 
 class Round2Controller extends Controller
 {
-    public function getByCohort($cohortId)
-{
-    $round1s = Round2::with('applicant')->where('cohort_id', $cohortId)->get();
-    return response()->json($round1s);
-}
-    public function index($cohortId)
+    protected $round2Service;
+
+    protected $applicantService;
+
+    public function __construct(Round2Service $round2Service, ApplicantService $applicantService)
     {
-        $cohortId = session('cohort_id');
+        $this->round2Service = $round2Service;
+        $this->applicantService = $applicantService;
+    }
 
-        if (!$cohortId) {
-            return response()->json(['error' => 'Cohort ID not found in session'], 400);
-        }
-
-        $cohort = Cohort::find($cohortId);
-        if (!$cohort) {
-            return response()->json(['error' => 'Cohort not found'], 404);
-        }
-
-        // Retrieve all round2 entries with associated applicant and cohort data
-        $round2s = Round2::with(['applicant', 'cohort'])->where('cohort_id', $cohortId)->get();
+    public function getByCohort($cohortId)
+    {
+        $round2s = $this->round2Service->getByCohort($cohortId);
 
         return response()->json($round2s);
     }
 
-    public function store(Request $request)
+    public function index($cohortId)
     {
-        try {
-            Log::info('Request data:', $request->all());
+        $round2s = $this->round2Service->getAllRound2s($cohortId);
 
-            // Validate request data for applicants table
-            $applicantData = $request->validate([
-                'first_name' => 'required|string',
-                'last_name' => 'required|string',
-                'email' => 'required|email|unique:applicants,email',
-                'company_name' => 'required|string',
-            ]);
-            $applicant = Applicant::whereHas('round1', function ($query) use ($applicantData) {
-                $query->where('company_name', $applicantData['company_name']);
-            })->first();
-    
-            if (!$applicant) {
-                // Return an error message if the applicant has not applied to Round 1
-                return response()->json(['message' => 'Company name must be the same you entered in Round 1. If you did not apply to Round 1, please fill out its form first.'], 400);
-            }
-            // Get the last cohort ID
-            $lastCohort = Cohort::latest('id')->first();
-            if (!$lastCohort) {
-                return response()->json(['message' => 'No cohort found'], 400);
-            }
-            $applicantData['cohort_id'] = $lastCohort->id;
-
-            // Create an applicant entry
-           // $applicant = Applicant::create($applicantData);
-           // Log::info('Applicant created:', ['applicant_id' => $applicant->id]);
-
-            // Validate request data for round2s table
-            $round2Data = $request->validate([
-                'phone' => 'nullable|string',
-                'One_Sentence_Description' => 'nullable|string|max:125',
-                'sector' => 'required|string',
-                'other_sector' => 'nullable|string',
-                'business_model' => 'required|string',
-                'other_business_model' => 'nullable|string',
-                'solution' => 'required|string',
-                'other_solution' => 'nullable|string',
-                'demo_url' => 'nullable|string',
-                'traction' => 'required|string',
-                'where_customer_find_solution' => 'required|string',
-                'revenue_generated' => 'required|string',
-                'funding_received' => 'required|array',
-                'other_funding_type' => 'nullable|string',
-                'sources_of_funding' => 'required|array',
-                'core_team_members' => 'required|integer',
-                'previous_startup_experience' => 'required|boolean',
-                'core_team' => 'nullable|string',
-                'core_team_experience' => 'nullable|string',
-                'employees_full_time_part_time_interns' => 'required|string',
-                'positions_to_fill' => 'nullable|string',
-                'goals_next_3_to_12_months' => 'required|string',
-                'prex_program_expectations' => 'required|string',
-                'accomplish_within_year' => 'required|array',
-                'submit_pitch_video_url' => 'required|string',
-                'covid19_resilience_impact' => 'nullable|string',
-                'social_impact' => 'required|string',
-                'covid19_impact' => 'required|array',
-                'other_covid19_impact' => 'nullable|string',
-                'critical_support_resource' => 'required|array',
-                'best_support_resource' => 'required|array',
-                'holding_back_growth_reason' => 'nullable|string',
-                'other_comments' => 'nullable|string',
-                'race_ethnicity' => 'nullable|array',
-                'gender' => 'nullable|array',
-                'team_identifiers' => 'nullable|array',
-                'if_other_team_identifiers' => 'nullable|string',
-            ]);
-
-            // Add applicant_id and cohort_id to round2Data
-            $round2Data['applicant_id'] = $applicant->id;
-            $round2Data['cohort_id'] = $lastCohort->id;
-
-            // Convert arrays to comma-separated strings
-            $round2Data['funding_received'] = implode(',', $round2Data['funding_received']);
-            $round2Data['sources_of_funding'] = implode(',', $round2Data['sources_of_funding']);
-            $round2Data['accomplish_within_year'] = implode(',', $round2Data['accomplish_within_year']);
-            $round2Data['covid19_impact'] = implode(',', $round2Data['covid19_impact']);
-            $round2Data['critical_support_resource'] = implode(',', $round2Data['critical_support_resource']);
-            $round2Data['best_support_resource'] = implode(',', $round2Data['best_support_resource']);
-            $round2Data['race_ethnicity'] = isset($round2Data['race_ethnicity']) ? implode(',', $round2Data['race_ethnicity']) : null;
-            $round2Data['gender'] = isset($round2Data['gender']) ? implode(',', $round2Data['gender']) : null;
-            $round2Data['team_identifiers'] = isset($round2Data['team_identifiers']) ? implode(',', $round2Data['team_identifiers']) : null;
-
-            Log::info('Round2 Data:', $round2Data);
-
-            // Create a new round2 entry
-            $round2 = Round2::create($round2Data);
-            Log::info('Round2 created:', ['round2_id' => $round2->id]);
-
-            return response()->json(['applicant' => $applicant, 'round2' => $round2], 201);
-        } catch (\Exception $e) {
-            Log::error('Error saving data:', ['message' => $e->getMessage(), 'trace' => $e->getTraceAsString()]);
-            return response()->json(['message' => 'Error saving data'], 500);
-        }
+        return response()->json($round2s);
     }
 
-    public function show($id)
+    public function store(ApplicantRequest $applicantRequest, Round2Request $round2Request)
     {
-        // Retrieve the round2 entry by id including related applicant data
-        $round2 = Round2::with('applicant')->findOrFail($id);
+        Log::info('Applicant Request Data:', $applicantRequest->all());
 
+        // Validate the ApplicantRequest data and create the Applicant
+        $applicantData = $applicantRequest->validated();
+
+        $applicant = Applicant::whereHas('round1', function ($query) use ($applicantData) {
+            $query->where('company_name', $applicantData['company_name']);
+        })->first();
+
+        if (!$applicant) {
+            // Return an error message if the applicant has not applied to Round 1
+            return response()->json(['message' => 'Company name must be the same you entered in Round 1. If you did not apply to Round 1, please fill out its form first.'], 400);
+        }
+      //  $applicant = $this->applicantService->createApplicant($validatedApplicantData);
+
+
+        // Pass the applicant_id and cohort_id to Round2Request
+        $round2Data = $round2Request->validated();
+        $round2Data['applicant_id'] = $applicant->id;
+        $round2Data['cohort_id'] = $applicant->cohort_id;
+
+        // Convert arrays to comma-separated strings
+        $round2Data['funding_received'] = isset($round2Data['funding_received']) ? implode(',', $round2Data['funding_received']) : null;
+        $round2Data['sources_of_funding'] = isset($round2Data['sources_of_funding']) ? implode(',', $round2Data['sources_of_funding']) : null;
+        $round2Data['accomplish_within_year'] = isset($round2Data['accomplish_within_year']) ? implode(',', $round2Data['accomplish_within_year']) : null;
+        $round2Data['covid19_impact'] = isset($round2Data['covid19_impact']) ? implode(',', $round2Data['covid19_impact']) : null;
+        $round2Data['critical_support_resource'] = isset($round2Data['critical_support_resource']) ? implode(',', $round2Data['critical_support_resource']) : null;
+        $round2Data['best_support_resource'] = isset($round2Data['best_support_resource']) ? implode(',', $round2Data['best_support_resource']) : null;
+        $round2Data['race_ethnicity'] = isset($round2Data['race_ethnicity']) ? implode(',', $round2Data['race_ethnicity']) : null;
+        $round2Data['gender'] = isset($round2Data['gender']) ? implode(',', $round2Data['gender']) : null;
+        $round2Data['team_identifiers'] = isset($round2Data['team_identifiers']) ? implode(',', $round2Data['team_identifiers']) : null;
+
+        Log::info('Round2 Data:', $round2Data);
+
+        // Create the Round2 entry
+        $round2 = $this->round2Service->createRound2($round2Data);
+
+        Log::info('Round2 created:', ['round2_id' => $round2->id]);
+
+        return response()->json([
+            'message' => 'Round 2 created successfully',
+            'round2' => $round2,
+            'applicant' => $applicant,
+        ], 201);
+    }
+
+    public function show(int $id)
+    {
+        $round2 = $this->round2Service->getRound2ById($id);
+        $applicant_id = $round2->applicant_id;
+        $applicant = $this->applicantService->getApplicantById($applicant_id);
         return response()->json($round2);
+
+        // return response()->json([
+        //     'round2' => $round2,
+        //     'applicant' => $applicant,
+        // ], 200);
     }
 
-    public function update(Request $request, $round2Id)
+    public function update(ApplicantRequest $applicantRequest, Round2Request $round2Request, int $id)
     {
-        try {
-            // Find the applicant and round2 instances
-            $round2 = Round2::findOrFail($round2Id);
-            $applicant = $round2->applicant;
+        Log::info('Request Data:', $round2Request->all());
 
-            // Validate data for both tables
-            $validatedApplicantData = $request->validate([
-                'first_name' => 'required|string|max:255',
-                'last_name' => 'required|string|max:255',
-                'email' => 'required|email|unique:applicants,email,' . $applicant->id,
-                'company_name' => 'required|string|max:255',
-            ]);
+        // dd([
+        //     'request' => $round2Request->all(),
+        //     'id' => $id
+        // ]);
+        Log::info("Update method called with ID: $id");
+        Log::info('Request URL: '.url()->current());
+        Log::info('Request Method: '.request()->method());
+        $applicant = $this->applicantService->updateApplicant($id, $applicantRequest->validated());
+        $round2Data = $round2Request->validated();
+        $round2Data['applicant_id'] = $applicant->id;
+        $round2Data['cohort_id'] = $applicant->cohort_id;
 
-            $validatedRound2Data = $request->validate([
-                'phone' => 'nullable|string|max:255',
-                'One-Sentence_Description' => 'nullable|string|max:125',
-                'sector' => 'required|string|max:255',
-                'other_sector' => 'nullable|string|max:255',
-                'business_model' => 'required|string|max:255',
-                'other_business_model' => 'nullable|string|max:255',
-                'solution' => 'required|string|max:255',
-                'other_solution' => 'nullable|string|max:255',
-                'demo_url' => 'nullable|string|max:255',
-                'traction' => 'required|string|max:255',
-                'where_customer_find_solution' => 'required|string|max:255',
-                'revenue_generated' => 'required|string|max:255',
-                'funding_received' => 'required|array',
-                'other_funding_type' => 'nullable|string|max:255',
-                'sources_of_funding' => 'required|array',
-                'core_team_members' => 'required|integer',
-                'previous_startup_experience' => 'required|boolean',
-                'core_team' => 'nullable|string|max:255',
-                'core_team_experience' => 'nullable|string|max:255',
-                'employees_full_time_part_time_interns' => 'required|string|max:255',
-                'positions_to_fill' => 'nullable|string|max:255',
-                'goals_next_3_to_12_months' => 'required|string|max:255',
-                'prex_program_expectations' => 'required|string|max:255',
-                'accomplish_within_year' => 'required|array',
-                'submit_pitch_video_url' => 'required|string|max:255',
-                'covid19_resilience_impact' => 'nullable|string|max:255',
-                'social_impact' => 'required|string|max:255',
-                'covid19_impact' => 'required|array',
-                'other_covid19_impact' => 'nullable|string|max:255',
-                'critical_support_resource' => 'required|array',
-                'best_support_resource' => 'required|array',
-                'holding_back_growth_reason' => 'nullable|string|max:255',
-                'other_comments' => 'nullable|string|max:65535',
-                'race_ethnicity' => 'nullable|array',
-                'gender' => 'nullable|array',
-                'team_identifiers' => 'nullable|array',
-                'if_other_team_identifiers' => 'nullable|string|max:255',
-            ]);
+        // Convert arrays to comma-separated strings
+        $round2Data['funding_received'] = isset($round2Data['funding_received']) ? implode(',', $round2Data['funding_received']) : null;
+        $round2Data['sources_of_funding'] = isset($round2Data['sources_of_funding']) ? implode(',', $round2Data['sources_of_funding']) : null;
+        $round2Data['accomplish_within_year'] = isset($round2Data['accomplish_within_year']) ? implode(',', $round2Data['accomplish_within_year']) : null;
+        $round2Data['covid19_impact'] = isset($round2Data['covid19_impact']) ? implode(',', $round2Data['covid19_impact']) : null;
+        $round2Data['critical_support_resource'] = isset($round2Data['critical_support_resource']) ? implode(',', $round2Data['critical_support_resource']) : null;
+        $round2Data['best_support_resource'] = isset($round2Data['best_support_resource']) ? implode(',', $round2Data['best_support_resource']) : null;
+        $round2Data['race_ethnicity'] = isset($round2Data['race_ethnicity']) ? implode(',', $round2Data['race_ethnicity']) : null;
+        $round2Data['gender'] = isset($round2Data['gender']) ? implode(',', $round2Data['gender']) : null;
+        $round2Data['team_identifiers'] = isset($round2Data['team_identifiers']) ? implode(',', $round2Data['team_identifiers']) : null;
+        Log::info($round2Data);
+        $round2 = $this->round2Service->updateRound2($id, $round2Data);
 
-            // Convert arrays to comma-separated strings
-            $validatedRound2Data['funding_received'] = implode(',', $validatedRound2Data['funding_received']);
-            $validatedRound2Data['sources_of_funding'] = implode(',', $validatedRound2Data['sources_of_funding']);
-            $validatedRound2Data['accomplish_within_year'] = implode(',', $validatedRound2Data['accomplish_within_year']);
-            $validatedRound2Data['covid19_impact'] = implode(',', $validatedRound2Data['covid19_impact']);
-            $validatedRound2Data['critical_support_resource'] = implode(',', $validatedRound2Data['critical_support_resource']);
-            $validatedRound2Data['best_support_resource'] = implode(',', $validatedRound2Data['best_support_resource']);
-            $validatedRound2Data['race_ethnicity'] = isset($validatedRound2Data['race_ethnicity']) ? implode(',', $validatedRound2Data['race_ethnicity']) : null;
-            $validatedRound2Data['gender'] = isset($validatedRound2Data['gender']) ? implode(',', $validatedRound2Data['gender']) : null;
-            $validatedRound2Data['team_identifiers'] = isset($validatedRound2Data['team_identifiers']) ? implode(',', $validatedRound2Data['team_identifiers']) : null;
+        Log::info('Applicant: ', $applicant->toArray());
+        Log::info('Round2: ', $round2->toArray());
 
-            // Update the applicant and round2 instances
-            $applicant->update($validatedApplicantData);
-            $round2->update($validatedRound2Data);
-
-            return response()->json(['applicant' => $applicant, 'round2' => $round2]);
-        } catch (\Exception $e) {
-            Log::error('Error updating data:', ['message' => $e->getMessage(), 'trace' => $e->getTraceAsString()]);
-            return response()->json(['message' => 'Error updating data'], 500);
-        }
+        return response()->json([
+            'message' => 'Round 2 updated successfully',
+            'round2' => $round2,
+            'applicant' => $applicant,
+        ], 200);
     }
 
-    public function destroy($id)
+    public function destroy(int $id)
     {
-        $round2 = Round2::findOrFail($id);
-        $round2->delete();
+        $this->round2Service->deleteRound2($id);
 
-        return response()->json(['message' => 'Round 2 entry deleted successfully']);
+        return response()->json([
+            'message' => 'Round 2 deleted successfully',
+        ], 200);
     }
 }

@@ -1,81 +1,128 @@
 <?php
-namespace App\Http\Controllers;
 
+namespace App\Http\Controllers;
+use Illuminate\Support\Facades\Log;
+
+use App\Http\Requests\applicant as RequestsApplicant;
+use App\Http\Requests\ApplicantRequest;
+use App\Http\Requests\Round2Request;
+use App\Http\Requests\Round3Request;
+
+use App\Http\Requests\FilterApplicantRequest;
+use App\Http\Requests;
 use App\Models\Applicant;
+use App\Models\round2;
+use App\Models\round3;
+use App\Services\ApplicantService;
 use Illuminate\Http\Request;
 
 class ApplicantController extends Controller
 {
-   // app/Http/Controllers/ApplicantController.php
-public function getApplicantDetails($id)
+    protected $applicantService;
+
+    /**
+     * Create a new controller instance.
+     */
+    public function __construct(ApplicantService $applicantService)
+    {
+        $this->applicantService = $applicantService;
+    }
+           // $applicants = $this->applicantService->filterApplicants($validatedFilters['filters'] ?? [], $searchTerm);
+
+    public function filter(FilterApplicantRequest $request)
+    {
+        // Get validated data from the request
+        $validatedFilters = $request->validated();
+        $searchTerm = $validatedFilters['search'] ?? null;
+    $searchTerm = $validatedFilters['search'] ?? null;
+
+        // Use the validated data to filter applicants
+        $applicants = $this->applicantService->filterApplicants($validatedFilters, $searchTerm);
+
+        // Return the filtered applicants as JSON
+        return response()->json($applicants);
+    }
+    public function getFilterOptions(FilterApplicantRequest $request)
+    {
+        $filterOptions = $this->applicantService->getFilterOptions();
+        // Return the filtered applicants as JSON
+        return response()->json(['original' => $filterOptions]);
+    }
+
+    
+    /**
+     * Display a listing of the applicants.
+     *
+     * @return \Illuminate\Http\JsonResponse
+     */
+    public function index(ApplicantRequest $request)
 {
     try {
-        $applicant = Applicant::with('round1', 'round2', 'round3')->find($id);
+        $validatedData = $request->validated();
+        Log::info('Applicant Request Data:', $validatedData);
+        $applicant = $this->applicantService->getAllApplicants($validatedData);
         return response()->json($applicant);
     } catch (\Exception $e) {
-        return response()->json(['message' => 'Error fetching applicant details'], 500);
+        Log::error('Error fetching applicants:', ['exception' => $e]);
+        return response()->json(['error' => 'Unable to fetch applicants'], 500);
     }
 }
 
-    public function index()
+    
+
+    /**
+     * Store a newly created applicant in storage.
+     *
+     * @return \Illuminate\Http\JsonResponse
+     */
+    public function store(ApplicantRequest $request)
     {
-        $applicants = Applicant::all();
-        return response()->json($applicants);
+        $applicant = $this->applicantService->createApplicant($request->validated());
+
+        return response()->json([
+            'message' => 'Applicant created successfully',
+            'applicant' => $applicant,
+        ], 201);
     }
 
     /**
-     * Store a newly created resource in storage.
+     * Display the specified applicant.
+     *
+     * @return \Illuminate\Http\JsonResponse
      */
-    public function store(Request $request)
+    public function show(int $id)
     {
-        $validatedData = $request->validate([
-            'first_name' => 'required|string|max:255',
-            'cohort_id' => 'required|exists:cohorts,id',
-
-            'last_name' => 'required|string|max:255',
-            'email' => 'required|string|email|max:255|unique:applicants',
-            'company_name' => 'required|string|max:255',
-        ]);
-
-        $applicant = Applicant::create($validatedData);
-
-        return response()->json($applicant, 201);
-    }
-
-    /**
-     * Display the specified resource.
-     */
-    public function show(Applicant $applicant)
-    {
-        return response()->json($applicant);
-    }
-
-    /**
-     * Update the specified resource in storage.
-     */
-    public function update(Request $request, Applicant $applicant)
-    {
-        $validatedData = $request->validate([
-            'first_name' => 'sometimes|required|string|max:255',
-            'cohort_id' => 'required|exists:cohorts,id',
-
-            'last_name' => 'sometimes|required|string|max:255',
-            'email' => 'sometimes|required|string|email|max:255|unique:applicants,email,' . $applicant->id,
-            'company_name' => 'sometimes|required|string|max:255',
-        ]);
-
-        $applicant->update($validatedData);
+        $applicant = $this->applicantService->getApplicantById($id);
 
         return response()->json($applicant);
     }
 
     /**
-     * Remove the specified resource from storage.
+     * Update the specified applicant in storage.
+     *
+     * @return \Illuminate\Http\JsonResponse
      */
-    public function destroy(Applicant $applicant)
+    public function update(ApplicantRequest $request, int $id)
     {
-        $applicant->delete();
+        $applicant = $this->applicantService->updateApplicant($id, $request->validated());
 
-        return response()->json(null, 204);
+        return response()->json([
+            'message' => 'Applicant updated successfully',
+            'applicant' => $applicant,
+        ], 200);
+    }
+
+    /**
+     * Remove the specified applicant from storage.
+     *
+     * @return \Illuminate\Http\JsonResponse
+     */
+    public function destroy(int $id)
+    {
+        $this->applicantService->deleteApplicant($id);
+
+        return response()->json([
+            'message' => 'Applicant deleted successfully',
+        ], 200);
     }
 }

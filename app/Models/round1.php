@@ -7,8 +7,8 @@ use Illuminate\Database\Eloquent\Model;
 class Round1 extends Model
 {
     protected $fillable = [
-       'applicant_id',
-       'cohort_id',
+        'applicant_id',
+        'cohort_id',
 
         'company_website',
         'company_zip_code',
@@ -35,12 +35,14 @@ class Round1 extends Model
         'race_ethnicity',
         'gender',
         'additional_demographics',
-        'team_identifiers'
+        'team_identifiers',
     ];
+
     public function comments()
     {
         return $this->hasMany(Comment::class);
     }
+
     /**
      * Get the applicant that owns the round1 entry.
      */
@@ -48,6 +50,7 @@ class Round1 extends Model
     {
         return $this->belongsTo(Applicant::class);
     }
+
     public function cohort()
     {
         return $this->belongsTo(Cohort::class);

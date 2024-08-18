@@ -1,38 +1,42 @@
 <?php
+
 namespace App\Http\Controllers;
 
-use App\Models\Survey;
-use Illuminate\Http\Request;
+use App\Http\Requests\SurveyRequest;
+use App\Services\SurveyService;
 
 class SurveyController extends Controller
 {
+    protected $surveyService;
+
+    /**
+     * Create a new controller instance.
+     */
+    public function __construct(SurveyService $surveyService)
+    {
+        $this->surveyService = $surveyService;
+    }
+
     /**
      * Display a listing of the surveys.
      *
-     * @return \Illuminate\Http\Response
+     * @return \Illuminate\Http\JsonResponse
      */
     public function index()
     {
-        $surveys = Survey::all();
-        return response()->json([
-            'surveys' => $surveys,
-        ], 200);
+        $surveys = $this->surveyService->getAllSurveys();
+
+        return response()->json($surveys);
     }
 
     /**
      * Store a newly created survey in storage.
      *
-     * @param  \Illuminate\Http\Request  $request
-     * @return \Illuminate\Http\Response
+     * @return \Illuminate\Http\JsonResponse
      */
-    public function store(Request $request)
+    public function store(SurveyRequest $request)
     {
-        $validatedData = $request->validate([
-            'ApplicantName' => 'required|string',
-            'CohortTag' => 'required|string',
-        ]);
-
-        $survey = Survey::create($validatedData);
+        $survey = $this->surveyService->createSurvey($request->validated());
 
         return response()->json([
             'message' => 'Survey created successfully',
@@ -43,31 +47,23 @@ class SurveyController extends Controller
     /**
      * Display the specified survey.
      *
-     * @param  \App\Models\Survey  $survey
-     * @return \Illuminate\Http\Response
+     * @return \Illuminate\Http\JsonResponse
      */
-    public function show(Survey $survey)
+    public function show(int $id)
     {
-        return response()->json([
-            'survey' => $survey,
-        ], 200);
+        $survey = $this->surveyService->getSurveyById($id);
+
+        return response()->json($survey);
     }
 
     /**
      * Update the specified survey in storage.
      *
-     * @param  \Illuminate\Http\Request  $request
-     * @param  \App\Models\Survey  $survey
-     * @return \Illuminate\Http\Response
+     * @return \Illuminate\Http\JsonResponse
      */
-    public function update(Request $request, Survey $survey)
+    public function update(SurveyRequest $request, int $id)
     {
-        $validatedData = $request->validate([
-            'ApplicantName' => 'required|string',
-            'CohortTag' => 'required|string',
-        ]);
-
-        $survey->update($validatedData);
+        $survey = $this->surveyService->updateSurvey($id, $request->validated());
 
         return response()->json([
             'message' => 'Survey updated successfully',
@@ -78,12 +74,11 @@ class SurveyController extends Controller
     /**
      * Remove the specified survey from storage.
      *
-     * @param  \App\Models\Survey  $survey
-     * @return \Illuminate\Http\Response
+     * @return \Illuminate\Http\JsonResponse
      */
-    public function destroy(Survey $survey)
+    public function destroy(int $id)
     {
-        $survey->delete();
+        $this->surveyService->deleteSurvey($id);
 
         return response()->json([
             'message' => 'Survey deleted successfully',

@@ -21,52 +21,52 @@ return new class extends Migration
             $table->year('year_company_founded')->nullable();
             $table->integer('number_of_founding_team_members');
             $table->enum('current_product_stage', [
-                'Idea', 
-                'Some Research and/or Business Planning', 
-                'Prototype Designed', 
-                'Prototype Developed', 
-                'Beta Testing', 
-                'Live Customers'
+                'Idea',
+                'Some Research and/or Business Planning',
+                'Prototype Designed',
+                'Prototype Developed',
+                'Beta Testing',
+                'Live Customers',
             ]);
             $table->enum('current_business_stage', [
-                'Idea', 
-                'Startup', 
-                'Growth', 
-                'Established', 
-                'Expansion', 
-                'Declining', 
-                'Exit'
+                'Idea',
+                'Startup',
+                'Growth',
+                'Established',
+                'Expansion',
+                'Declining',
+                'Exit',
             ]);
             $table->enum('company_formed', [
-                'No', 
-                'Yes (LLC)', 
-                'Yes (B-Corp)', 
-                'Yes (C-Corp)', 
-                'Yes (S-Corp)', 
-                'Yes (Nonprofit)', 
-                'Other'
+                'No',
+                'Yes (LLC)',
+                'Yes (B-Corp)',
+                'Yes (C-Corp)',
+                'Yes (S-Corp)',
+                'Yes (Nonprofit)',
+                'Other',
             ]);
             $table->string('one_sentence_description', 125);
             $table->enum('company_team_location', [
-                'Hawaii Island', 
-                'Kauai', 
+                'Hawaii Island',
+                'Kauai',
                 'Lanai',
-                 'Maui',
-                  'Molokai',
-                   'Niihau', 
-                   'Oahu',
-                    'Other'
+                'Maui',
+                'Molokai',
+                'Niihau',
+                'Oahu',
+                'Other',
             ]);
             $table->string('if_you_selected_other_please_specify')->nullable();
             $table->text('short_problem_description');
             $table->text('detailed_description');
             $table->enum('applied_to_accelerator', [
-                'No', 
+                'No',
                 'Yes - I was accepted and received funding',
                 'Yes - I was accepted but there was no funding',
                 'Yes - I was accepted but decided to pass',
                 'Yes - I was not accepted / did not receive funding',
-                'I’m not sure'
+                'I’m not sure',
             ]);
             $table->string('previous_accelerator_places')->nullable();
             $table->string('If_Yes_please_indicate_ALL_the_PREVIOUS_places')->nullable();
@@ -78,11 +78,11 @@ return new class extends Migration
                 'Yes, and business is still struggling.',
                 'Yes, initially but now business is back to near pre-pandemic levels.',
                 'Yes, initially but now business is better than ever.',
-                'Yes, but business has pivoted.'
+                'Yes, but business has pivoted.',
             ]);
             $table->text('reason_for_applying');
             $table->text('biggest_challenge');
-            $table->string('how_did_you_hear_about_us'); 
+            $table->string('how_did_you_hear_about_us');
             $table->string('race_ethnicity')->nullable();
             $table->string('gender')->nullable();
             $table->string('additional_demographics')->nullable();

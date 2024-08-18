@@ -1,157 +1,92 @@
 <?php
+
 namespace App\Http\Controllers;
 
+use App\Http\Requests\OnboardingSurveyRequest;
+use App\Http\Requests\SurveyRequest;
 use App\Models\OnboardingSurvey;
-use App\Models\Survey;
-use App\Models\cohort;
+use App\Services\OnboardingSurveyService;
+use App\Services\SurveyService;
 use Illuminate\Support\Facades\Log;
-
-use Illuminate\Http\Request;
 
 class OnboardingSurveyController extends Controller
 {
-    public function getByCohort($cohortId)
-{
-    $round1s = OnboardingSurvey::with('survey')->where('cohort_id', $cohortId)->get();
-    return response()->json($round1s);
-}
-    public function index()
-    {
-        $onboardingSurveys = OnboardingSurvey::with('survey')->get();
+    protected $onboardingSurveyService;
 
-        return response()->json([
-            'message' => 'Successfully fetched onboarding surveys',
-            'onboarding_surveys' => $onboardingSurveys,
-        ]);
+    protected $surveyService;
+
+    public function __construct(OnboardingSurveyService $onboardingSurveyService, SurveyService $surveyService)
+    {
+        $this->onboardingSurveyService = $onboardingSurveyService;
+        $this->surveyService = $surveyService;
     }
 
-        public function store(Request $request)
-        {
-            $validatedData = $request->validate([
-                'applicant_name' => 'required|string',
-                'cohort_tag' => 'required|string',
-                'company_name' => 'required|string',
-            ]);
-            $validatedData2 = $request->validate([
-                'email' => 'nullable|email',
-                'phone' => 'nullable|string',
-                'material_due' => 'nullable|date',
-            ]);
-            $lastCohort = Cohort::latest('id')->first();
-            if ($lastCohort) {
-                $validatedData['cohort_id'] = $lastCohort->id;
-                $validatedData2['cohort_id'] = $lastCohort->id;
-            } else {
-                return response()->json([
-                    'message' => 'No cohort found'
-                ], 400);
-            }           
-             $survey = Survey::create($validatedData);
-
-            $survey->applicant_name = $validatedData['applicant_name'];
-            $survey->cohort_tag = $validatedData['cohort_tag'];
-            $survey->company_name = $validatedData['company_name'];
-            $survey->save();
-
-           Log::info('Created Survey:', $survey->toArray());
-         $validatedData2['survey_id'] = $survey->id;
-          $onboardingSurvey = OnboardingSurvey::create($validatedData2);
-         Log::info('Created Onboarding Survey:', $onboardingSurvey->toArray());
-        
-            return response()->json([
-                'message' => 'Onboarding Survey created successfully',
-                'onboarding_survey' => $onboardingSurvey,
-                'survey' => $survey
-            ], 201);
-        }
-        
-
-    public function show(OnboardingSurvey $onboardingSurvey, $id)
+    public function getByCohort($cohortId)
     {
-       //$onboardingSurvey->load('survey'); // Eager load the associated survey
-        //return response()->json($onboardingSurvey->load('survey'));
-        Log::info('Fetching onboarding survey data for ' . $id);
-
-        $onboardingSurvey = OnboardingSurvey::with('survey')->findOrFail($id);
+        $onboardingSurvey = $this->onboardingSurveyService->getByCohort($cohortId);
 
         return response()->json($onboardingSurvey);
-
-        return response()->json([
-            'message' => 'Successfully fetched Onboarding Survey',
-            'onboarding_survey' => $onboardingSurvey,
-        ]);
     }
 
-    public function update(Request $request, OnboardingSurvey $onboardingSurvey, $id)
+    public function index()
     {
-        $onboardingSurvey = OnboardingSurvey::findOrFail($id);
-        $survey = Survey::find($onboardingSurvey->survey_id);
-        $validatedData = $request->validate([
-            'applicant_name' => 'required|string',
-            'cohort_tag' => 'required|string',
-            'company_name' => 'required|string',
-            'email' => 'nullable|email',
-            'phone' => 'nullable|string',
-            'material_due' => 'nullable|string',
-        ]);
+        $onboardingSurveys = $this->onboardingSurveyService->getAllOnboardingSurveys();
 
-        if (!$survey) 
-        {
-            return response()->json(['error' => 'Survey not found'], 404);
-        } 
-        else
-        {
-            $survey->applicant_name = $validatedData['applicant_name'];
-            $survey->cohort_tag = $validatedData['cohort_tag'];
-            $survey->company_name = $validatedData['company_name'];
-            $survey->save();
-        }
-        // $survey->update([
-        //     'applicant_name' => $validatedData['applicant_name'],
-        //     'cohort_tag' => $validatedData['cohort_tag'],
-        //     'company_name' => $validatedData['company_name']
-        // ]);
-        $lastCohort = Cohort::latest('id')->first();
-        if ($lastCohort) {
-            $validatedData['cohort_id'] = $lastCohort->id;
-        } else {
-            return response()->json([
-                'message' => 'No cohort found'
-            ], 400);
-        }
-        $onboardingSurvey->update([
-            'email' => $validatedData['email'],
-            'phone' => $validatedData['phone'],
-            'material_due' => $validatedData['material_due'],
-            'cohort_id' => $validatedData['cohort_id']
-        ]);
-
-        return response()->json([
-            'message' => 'Onboarding Survey updated successfully',
-            'onboarding_survey' => $onboardingSurvey,
-            'survey'=> $survey
-        ]);
+        return response()->json($onboardingSurveys);
     }
 
-    public function destroy(OnboardingSurvey $onboardingSurvey, $id)
+    public function store(OnboardingSurveyRequest $onboardingSurveyRequest, SurveyRequest $surveyRequest)
     {
-        $onboardingSurvey = OnboardingSurvey::findOrFail($id);
+        // Validate the SurveyRequest data and create the Survey
+        $validatedSurveyData = $surveyRequest->validated();
+        $survey = $this->surveyService->createSurvey($validatedSurveyData);
+        Log::info('Survey Request Data:', $surveyRequest->all());
 
-        $survey = Survey::find($onboardingSurvey->survey_id);
-    
-        $onboardingSurvey->delete();
-    
-        if ($survey) {
-            $survey->delete();
-        }
-    
+        // Pass the survey_id and cohort_id to OnboardingSurveyRequest
+        $onboardingSurveyData = $onboardingSurveyRequest->validated();
+        $onboardingSurveyData['survey_id'] = $survey->id;
+        $onboardingSurveyData['cohort_id'] = $survey->cohort_id;
+        // Create the OnboardingSurvey using the validated data
+        $onboardingSurvey = $this->onboardingSurveyService->createOnboardingSurvey($onboardingSurveyData);
+        Log::info('Onboarding Survey Request Data:', $onboardingSurveyRequest->all());
+
         return response()->json([
-            'message' => 'Onboarding Survey and associated Survey deleted successfully',
-        ]);
-    }
-    
-
-        
-
+            'message' => 'Onboarding survey created successfully',
+            'onboardingSurvey' => $onboardingSurvey,
+            'survey' => $survey,
+        ], 201);
     }
 
+    public function show(int $id)
+    {
+        $onboardingSurvey = $this->onboardingSurveyService->getOnboardingSurveyById($id);
+        $survey_id = $onboardingSurvey->survey_id;
+        $survey = $this->surveyService->getSurveyById($survey_id);
+
+        return response()->json([
+            'onboardingSurvey' => $onboardingSurvey,
+            'survey' => $survey,
+        ], 201);
+    }
+
+    public function update(SurveyRequest $request2, OnboardingSurveyRequest $request, int $id)
+    {
+        $survey = $this->surveyService->updateSurvey($id, $request2->validated());
+        $onboardingSurvey = $this->onboardingSurveyService->updateOnboardingSurvey($id, $request->validated());
+
+        return response()->json([
+            'message' => 'Onboarding survey updated successfully',
+            'onboardingSurvey' => $onboardingSurvey,
+            'survey' => $survey,
+        ], 200);
+    }
+
+    public function destroy(int $id)
+    {
+        $this->onboardingSurveyService->deleteOnboardingSurvey($id);
+
+        return response()->json([
+            'message' => 'Onboarding survey deleted successfully',
+        ], 200);
+    }
+}
